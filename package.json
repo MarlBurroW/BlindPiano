@@ -19,6 +19,7 @@
     "socket.io-client": "^4.4.1",
     "url-join": "^5.0.0",
     "uuid": "^8.3.2",
+    "vue-avataaars": "^0.0.4",
     "vue-clipboard2": "^0.3.3"
   },
   "scripts": {

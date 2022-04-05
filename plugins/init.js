@@ -3,8 +3,11 @@ import urljoin from "url-join";
 
 import Vue from "vue";
 import VueClipboard from "vue-clipboard2";
+import Avataaars from "vue-avataaars";
 
 export default async (app, inject) => {
+  Vue.component(Avataaars);
+
   const notyf = new Notyf({
     duration: 5000,
     ripple: true,
