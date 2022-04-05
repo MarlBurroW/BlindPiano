@@ -1,9 +1,15 @@
 const { io } = require("../modules/server.js");
 const app = require("../modules/app");
+const GameContext = require("../classes/GameContext");
 
-const gameAccess = require("./controllers/game-access");
-const managePlayer = require("./controllers/manage-players");
-const gameRunning = require("./controllers/game-running");
+const Game = require("../classes/Game.js");
+
+const disconnect = require("./socket-events/disconnect");
+const joinGame = require("./socket-events/join-game");
+const kickPlayer = require("./socket-events/kick-player");
+const startGame = require("./socket-events/start-game");
+
+const events = require("../../events");
 
 module.exports = {
   start() {
@@ -12,19 +18,16 @@ module.exports = {
     io.on("connection", (socket) => {
       console.log(`Socket ${socket.id} connected`);
 
-      const ctx = {
-        game: null,
-        me: null,
-        app,
-      };
+      const gameContext = new GameContext();
 
-      gameAccess(socket, ctx);
-      managePlayer(socket, ctx);
-      gameRunning(socket, ctx);
-    });
+      gameContext.setApp(app);
+      gameContext.setIO(io);
+      gameContext.setSocket(socket);
 
-    io.on("disconnect", () => {
-      console.log(`Socket ${socket.id} disconnected`);
+      socket.on(events.DISCONNECT, disconnect(gameContext));
+      socket.on(events.JOIN_GAME, joinGame(gameContext));
+      socket.on(events.KICK_PLAYER, kickPlayer(gameContext));
+      socket.on(events.START_GAME, startGame(gameContext));
     });
   },
 };

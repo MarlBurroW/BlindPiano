@@ -1,13 +1,28 @@
 const _ = require("lodash");
-const EventEmitter = require("events");
+const events = require("../../events");
+const gameStates = require("../../game_states");
 
-class Game extends EventEmitter {
+class Game {
   constructor(id) {
-    super();
     this.id = id;
     this.players = [];
-    this.state = "wait-players";
+    this.state = gameStates.WAITING_PLAYERS;
     this.leaderId = null;
+    this.io = null;
+  }
+
+  setIO(io) {
+    this.io = io;
+  }
+
+  emit(event, payload) {
+    this.io.to(this.id).emit(event, payload);
+  }
+
+  emitToPlayer(player, event, payload) {
+    if (player.isOnline()) {
+      this.io.to(player.getSocket().id).emit(event, payload);
+    }
   }
 
   findPlayerBySocketId(socketId) {
@@ -23,42 +38,52 @@ class Game extends EventEmitter {
 
   emptyCheck() {
     if (this.playerCount() < 1) {
-      this.emit("game-empty");
+      // this.emit("game-empty");
     }
   }
 
   addPlayer(player) {
     this.players.push(player);
-    this.electLeader();
+    this.electNewLeaderIfNeeded();
     this.emptyCheck();
-    this.emit("player-added", player);
+    this.gameUpdate();
   }
 
   hasLeader() {
-    return this.leaderId && this.findPlayerById(this.leaderId);
+    if (this.leaderId) {
+      const leader = this.getLeader();
+
+      return leader && leader.isOnline();
+    }
+
+    return false;
   }
 
   getLeader() {
     return _.find(this.players, (p) => p.id === this.leaderId);
   }
 
-  electLeader() {
+  electNewLeaderIfNeeded() {
     if (!this.hasLeader()) {
       const player = _.first(this.players);
       if (player) {
         this.leaderId = player.id;
-        this.emit("new-leader-elected", player);
+        this.gameUpdate();
       }
     }
+  }
+
+  gameUpdate() {
+    this.emit(events.GAME_UPDATED, this.toClientResource());
   }
 
   removePlayerById(playerId) {
     const player = this.findPlayerById(playerId);
     if (player) {
       _.remove(this.players, (p) => p.id === player.id);
-      this.electLeader();
+      this.electNewLeaderIfNeeded();
       this.emptyCheck();
-      this.emit("player-removed", player);
+      this.gameUpdate();
     }
   }
 
@@ -70,6 +95,23 @@ class Game extends EventEmitter {
     return _.find(this.players, (p) => p.claimToken === claimToken);
   }
 
+  setState(state) {
+    this.state = state;
+
+    this.players = _.shuffle(this.players);
+
+    this.gameUpdate();
+  }
+
+  getState() {
+    return this.state;
+  }
+
+  start() {
+    this.setState("running");
+    this.gameUpdate();
+  }
+
   toClientResource() {
     return {
       id: this.id,
@@ -77,15 +119,6 @@ class Game extends EventEmitter {
       leaderId: this.leaderId,
       players: this.players.map((p) => p.toClientResource()),
     };
-  }
-
-  setState(state) {
-    this.state = state;
-    this.emit("state-changed", state);
-  }
-
-  start() {
-    this.setState("started");
   }
 }
 

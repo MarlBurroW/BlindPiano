@@ -1,7 +1,8 @@
 const uuid = require("uuid");
 const Game = require("../classes/Game");
 const _ = require("lodash");
-const gameBinder = require("../socket/event-binders/game-binder");
+
+const { io } = require("../modules/server.js");
 
 class GameManager {
   constructor() {
@@ -13,8 +14,6 @@ class GameManager {
 
     const game = new Game(gameId);
 
-    gameBinder(game);
-
     return game;
   }
 
@@ -25,9 +24,7 @@ class GameManager {
   addGame(game) {
     this.games.push(game);
 
-    game.on("game-empty", () => {
-      this.removeGameById(game.id);
-    });
+    game.setIO(io);
   }
 
   findGameById(gameId) {

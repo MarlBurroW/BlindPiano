@@ -1,7 +1,9 @@
 <template>
   <v-dialog max-width="600" persistent :value="open">
     <v-card class="elevation-12">
-      <v-toolbar color="primary" dark>Waiting players</v-toolbar>
+      <v-toolbar dark>
+        <v-toolbar-title>Invite your friends</v-toolbar-title>
+      </v-toolbar>
       <v-card-text v-if="game">
         <v-list subheader>
           <v-subheader
@@ -30,10 +32,9 @@
             :items="game.players"
           >
             <template v-slot:item.nickname="{ item }">
-              <v-chip v-if="game.leaderId === item.id" class="mr-2 primary"
-                >Leader</v-chip
-              >
-              {{ item.nickname }}
+              <v-icon v-if="game.leaderId === item.id" color="warning"
+                >mdi-star</v-icon
+              ><span class="overline"> {{ item.nickname }}</span>
             </template>
             <template v-slot:item.actions="{ item }">
               <v-btn
@@ -76,22 +77,23 @@
 
 <script>
 import contextMixin from "../mixins/context-mixin";
+import gameStates from "../game_states";
+import events from "../events";
+
 export default {
   mixins: [contextMixin],
 
   methods: {
     startGame() {
-      this.socket.emit("game:start", (response) => {});
+      this.socket.emit(events.START_GAME);
     },
     kick(player) {
-      this.socket.emit("game:kick-player", player.id, (response) => {
-        console.log(response);
-      });
+      this.socket.emit(events.KICK_PLAYER, player.id);
     },
   },
   computed: {
     open() {
-      return this.game && this.game.state === "wait-players";
+      return this.game && this.game.state === gameStates.WAITING_PLAYERS;
     },
   },
 };

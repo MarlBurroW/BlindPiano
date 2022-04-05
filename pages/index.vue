@@ -6,6 +6,9 @@
           <v-flex xs12 sm8 md4>
             <v-form id="create-game-form" @submit.prevent="createGame">
               <v-card class="elevation-12">
+                <v-toolbar dark>
+                  <v-toolbar-title>Create a new game</v-toolbar-title>
+                </v-toolbar>
                 <v-card-text>
                   <v-text-field
                     outlined
@@ -18,7 +21,7 @@
                     "
                     prepend-inner-icon="mdi-account"
                     name="nickname"
-                    label="Nickname"
+                    label="Enter your nickname"
                     type="text"
                   ></v-text-field>
                 </v-card-text>

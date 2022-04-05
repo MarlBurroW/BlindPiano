@@ -6,14 +6,23 @@ class Player {
     this.claimToken = this.createToken();
   }
 
-  send(event, payload, callback) {
-    if (this.hasSocket()) {
-      this.socket.emit(event, payload, callback);
-    }
+  isLeaderOf(game) {
+    return game.leaderId === this.id;
   }
 
   attachSocket(socket) {
     this.socket = socket;
+  }
+
+  disconnect() {
+    if (this.isOnline()) {
+      this.socket.disconnect();
+      this.detachSocket();
+    }
+  }
+
+  detachSocket() {
+    this.socket = null;
   }
 
   hasSocket() {
@@ -28,15 +37,23 @@ class Player {
     return Math.random().toString(36).substr(2); // remove `0.`
   }
 
+  isLeaderOf(game) {
+    return game.hasLeader() && game.leaderId == this.id;
+  }
+
+  isOnline() {
+    return this.hasSocket() && this.socket.connected;
+  }
+  isOffline() {
+    return !this.isOnline();
+  }
+
   toClientResource() {
     return {
       id: this.id,
+      online: this.isOnline(),
       nickname: this.nickname,
     };
-  }
-
-  isLeaderOf(game) {
-    return game.hasLeader() && game.leaderId == this.id;
   }
 }
 

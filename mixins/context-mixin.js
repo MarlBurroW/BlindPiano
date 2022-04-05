@@ -32,6 +32,10 @@ export default {
         return this.$store.state.gameId;
       },
     },
+    gameState() {
+      return this.game ? this.game.state : null;
+    },
+
     socket() {
       return this.$getSocketInstance();
     },

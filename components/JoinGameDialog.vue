@@ -2,7 +2,9 @@
   <v-dialog max-width="600" persistent :value="open">
     <v-form id="create-game-form" @submit.prevent="joinGame">
       <v-card class="elevation-12">
-        <v-toolbar color="primary" dark>Join the party</v-toolbar>
+        <v-toolbar dark>
+          <v-toolbar-title>Enter your nickname</v-toolbar-title>
+        </v-toolbar>
         <v-card-text>
           <v-text-field
             outlined
@@ -28,7 +30,7 @@
             type="submit"
             form="create-game-form"
             color="primary"
-            >Join</v-btn
+            >Join the game !</v-btn
           >
         </v-card-actions>
       </v-card>
@@ -40,13 +42,11 @@
 import contextMixin from "../mixins/context-mixin";
 
 export default {
+  mixins: [contextMixin],
   props: {
     open: {
       type: Boolean,
       default: false,
-    },
-    gameId: {
-      type: String,
     },
   },
 
