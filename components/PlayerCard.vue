@@ -1,0 +1,74 @@
+<template>
+  <v-card color="grey darken-3">
+    <v-app-bar flat color="rgba(0, 0, 0, 0)">
+      <v-spacer></v-spacer>
+      <v-toolbar-title class="text-h6 white--text pl-0">
+        {{ player.nickname }}
+      </v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-menu left bottom v-if="me.id !== player.id && me.id == game.leaderId">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon v-bind="attrs" v-on="on">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item @click="kick(player)">
+            <v-list-item-title>Kick {{ player.nickname }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-app-bar>
+    <v-card-text>
+      <v-layout align-center justify-center>
+        <v-badge :value="leader" color="transparent" overlap>
+          <template v-slot:badge>
+            <v-icon color="warning" size="40">mdi-star</v-icon>
+          </template>
+          <Avataaars
+            :avatar-options="player.avatar"
+            :height="150"
+            :width="150"
+            class="mb-5"
+          ></Avataaars>
+        </v-badge>
+      </v-layout>
+    </v-card-text>
+  </v-card>
+</template>
+
+<script>
+export default {
+  props: {
+    player: {
+      type: Object,
+      required: true,
+    },
+    leader: {
+      type: Boolean,
+    },
+    me: {
+      type: Object,
+      required: true,
+    },
+    game: {
+      type: Object,
+      required: true,
+    },
+  },
+  methods: {
+    kick(player) {
+      this.$emit("kick", player);
+    },
+  },
+};
+</script>
+
+<style scoped lang="scss">
+.nickname {
+  font-size: 25px;
+}
+</style>

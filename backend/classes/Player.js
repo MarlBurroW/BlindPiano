@@ -1,9 +1,11 @@
 class Player {
-  constructor(id, nickname) {
+  constructor(id, nickname, avatar) {
     this.id = id;
     this.nickname = nickname;
     this.socket = null;
     this.claimToken = this.createToken();
+
+    this.avatar = avatar;
   }
 
   isLeaderOf(game) {
@@ -53,6 +55,7 @@ class Player {
       id: this.id,
       online: this.isOnline(),
       nickname: this.nickname,
+      avatar: this.avatar,
     };
   }
 }

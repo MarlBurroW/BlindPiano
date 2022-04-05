@@ -4,6 +4,7 @@ export const state = () => ({
   game: null,
   me: null,
   socket: null,
+  chatMessages: [],
 });
 
 export const mutations = {
@@ -18,5 +19,9 @@ export const mutations = {
   },
   storeGameId(state, gameId) {
     state.gameId = gameId;
+  },
+
+  addChatMessage(state, message) {
+    state.chatMessages.push(message);
   },
 };

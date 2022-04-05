@@ -1,68 +1,16 @@
 <template>
   <div>
-    <v-app-bar app clipped-left>
+    <v-app-bar app clipped-left clipped-right>
       <v-toolbar-title>Blind PIano</v-toolbar-title>
 
       <v-spacer></v-spacer>
     </v-app-bar>
-    <v-navigation-drawer app clipped permanent>
-      <v-list v-if="game">
-        <v-list-item
-          :disabled="!player.online"
-          v-for="player in game.players"
-          :key="player.id"
-        >
-          <v-list-item-icon>
-            <v-badge
-              bordered
-              dot
-              :color="player.online ? 'success' : 'error'"
-              overlap
-            >
-              <v-icon>mdi-account</v-icon>
-            </v-badge>
-          </v-list-item-icon>
-
-          <v-list-item-content>
-            <v-list-item-title class="overline">{{
-              player.nickname
-            }}</v-list-item-title>
-          </v-list-item-content>
-
-          <v-list-item-icon>
-            <v-icon color="warning" v-if="game.leaderId === player.id"
-              >mdi-star</v-icon
-            >
-          </v-list-item-icon>
-
-          <v-list-item-action>
-            <v-menu left bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn icon v-bind="attrs" v-on="on">
-                  <v-icon>mdi-dots-vertical</v-icon>
-                </v-btn>
-              </template>
-
-              <v-list>
-                <v-list-item
-                  v-if="isLeader && player.id !== me.id"
-                  @click="kick(player)"
-                >
-                  <v-list-item-title
-                    >Kick {{ player.nickname }}</v-list-item-title
-                  >
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-list-item-action>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+    <left-sidebar></left-sidebar>
 
     <v-main>
       <v-container v-if="game" class="py-8 px-6" fluid> </v-container>
     </v-main>
-
+    <right-sidebar></right-sidebar>
     <WaitPlayers></WaitPlayers>
 
     <JoinGameDialog
@@ -126,6 +74,10 @@ export default {
     this.socket.on(events.GAME_ALREADY_STARTED, () => {
       this.$notyf.error("Game has already been started.");
       this.$router.push({ name: "index" });
+    });
+
+    this.socket.on(events.CHAT_MESSAGE, (message) => {
+      this.$store.commit("addChatMessage", message);
     });
   },
 

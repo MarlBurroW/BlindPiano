@@ -44,6 +44,8 @@
 import _ from "lodash";
 
 export default {
+  props: {},
+
   created() {
     this.randomize();
   },
@@ -59,7 +61,14 @@ export default {
       }
     },
   },
-
+  watch: {
+    avatarOptions: {
+      deep: true,
+      handler(value) {
+        this.$emit("update:avatar", value);
+      },
+    },
+  },
   data() {
     return {
       avatarOptions: {

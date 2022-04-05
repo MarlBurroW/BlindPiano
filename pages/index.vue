@@ -10,7 +10,7 @@
                   <v-toolbar-title>Create a new game</v-toolbar-title>
                 </v-toolbar>
                 <v-card-text>
-                  <avatar-creator></avatar-creator>
+                  <avatar-creator :avatar.sync="avatar"></avatar-creator>
 
                   <v-text-field
                     outlined
@@ -59,7 +59,7 @@ export default {
       this.error = null;
       this.createGameLoading = true;
       this.$axios
-        .post("/api/games", { nickname: this.nickname })
+        .post("/api/games", { nickname: this.nickname, avatar: this.avatar })
         .then((res) => {
           const gameId = res.data.gameId;
 
@@ -89,6 +89,7 @@ export default {
   data: () => ({
     createGameLoading: false,
     nickname: "",
+    avatar: null,
     errors: null,
     error: null,
   }),

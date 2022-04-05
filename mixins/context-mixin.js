@@ -42,6 +42,9 @@ export default {
     isLeader() {
       return this.me && this.game && this.me.id === this.game.leaderId;
     },
+    chatMessages() {
+      return this.$store.state.chatMessages;
+    },
   },
   methods: {},
 };

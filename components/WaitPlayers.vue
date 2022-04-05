@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="600" persistent :value="open">
+  <v-dialog max-width="800" persistent :value="open">
     <v-card class="elevation-12">
       <v-toolbar dark>
         <v-toolbar-title>Invite your friends</v-toolbar-title>
@@ -12,40 +12,17 @@
             party</v-subheader
           >
 
-          <v-data-table
-            hide-default-footer
-            hide-default-header
-            :headers="[
-              {
-                text: 'Player',
-                align: 'start',
-                sortable: false,
-                value: 'nickname',
-              },
-              {
-                text: 'Actions',
-                align: 'right',
-                sortable: false,
-                value: 'actions',
-              },
-            ]"
-            :items="game.players"
-          >
-            <template v-slot:item.nickname="{ item }">
-              <v-icon v-if="game.leaderId === item.id" color="warning"
-                >mdi-star</v-icon
-              ><span class="overline"> {{ item.nickname }}</span>
-            </template>
-            <template v-slot:item.actions="{ item }">
-              <v-btn
-                v-if="isLeader && item.id !== me.id"
-                icon
-                @click="kick(item)"
-              >
-                <v-icon color="red darken-3"> mdi-close </v-icon>
-              </v-btn>
-            </template>
-          </v-data-table>
+          <v-row>
+            <v-col cols="4" :key="player.id" v-for="player in game.players">
+              <player-card
+                :leader="player.id === game.leaderId"
+                :player="player"
+                :me="me"
+                :game="game"
+                @kick="kick($event)"
+              ></player-card>
+            </v-col>
+          </v-row>
         </v-list>
       </v-card-text>
       <v-card-actions class="justify-end">

@@ -1,11 +1,12 @@
 <template>
-  <v-dialog max-width="600" persistent :value="open">
+  <v-dialog max-width="1000" persistent :value="open">
     <v-form id="create-game-form" @submit.prevent="joinGame">
       <v-card class="elevation-12">
         <v-toolbar dark>
           <v-toolbar-title>Enter your nickname</v-toolbar-title>
         </v-toolbar>
         <v-card-text>
+          <avatar-creator :avatar.sync="avatar"></avatar-creator>
           <v-text-field
             outlined
             v-model="nickname"
@@ -57,7 +58,11 @@ export default {
       this.joinGameLoading = false;
 
       this.$axios
-        .post("/api/games", { nickname: this.nickname, gameId: this.gameId })
+        .post("/api/games", {
+          nickname: this.nickname,
+          gameId: this.gameId,
+          avatar: this.avatar,
+        })
         .then((res) => {
           this.game = res.data.game;
           this.claimToken = res.data.claimToken;
@@ -79,6 +84,7 @@ export default {
     return {
       joinGameLoading: false,
       nickname: "",
+      avatar: null,
       errors: null,
       error: null,
     };
