@@ -4,14 +4,20 @@ import urljoin from "url-join";
 import Vue from "vue";
 import VueClipboard from "vue-clipboard2";
 import Avataaars from "vue-avataaars";
-
+import VueChatScroll from "vue-chat-scroll";
+import VueDragscroll from "vue-dragscroll";
 export default async (app, inject) => {
   Vue.component(Avataaars);
-
+  Vue.use(VueChatScroll);
+  Vue.use(VueDragscroll);
   const notyf = new Notyf({
     duration: 5000,
     ripple: true,
     dismissible: true,
+    position: {
+      x: "center",
+      y: "top",
+    },
     types: [
       {
         type: "info",

@@ -13,6 +13,7 @@ class ChatMessage {
       nickname: this.player.nickname,
       playerId: this.player.id,
       message: this.message,
+      color: this.player.color,
     };
   }
 }

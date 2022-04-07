@@ -5,6 +5,8 @@ export const state = () => ({
   me: null,
   socket: null,
   chatMessages: [],
+  midiDevices: [],
+  midiDevice: null,
 });
 
 export const mutations = {
@@ -24,4 +26,11 @@ export const mutations = {
   addChatMessage(state, message) {
     state.chatMessages.push(message);
   },
+  storeMidiDevices(state, devices) {
+    state.midiDevices = devices;
+  },
+  storeMidiDevice(state, device) {
+    state.midiDevice = device;
+  },
 };
+export const strict = false;

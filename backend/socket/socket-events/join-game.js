@@ -41,6 +41,8 @@ module.exports = (gameContext) => {
       game: game.toClientResource(),
     });
 
+    game.emit(events.PLAYER_JOINED, me.toClientResource());
+
     game.gameUpdate();
   };
 };

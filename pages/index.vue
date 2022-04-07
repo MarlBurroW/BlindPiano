@@ -51,7 +51,6 @@
 <script>
 import contextMixin from "../mixins/context-mixin";
 export default {
-  mounted() {},
   mixins: [contextMixin],
   methods: {
     createGame() {

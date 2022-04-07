@@ -7,8 +7,6 @@ module.exports = (gameContext) => {
     const player = game.findPlayerById(playerId);
     const socket = gameContext.getSocket();
 
-    console.log(me.id, game.leaderId);
-
     if (!me.isLeaderOf(game)) {
       socket.emit(events.MESSAGE, {
         type: "error",
@@ -18,18 +16,16 @@ module.exports = (gameContext) => {
     }
 
     if (player) {
+      game.promote(player);
+
       game.emitToPlayer(player, events.MESSAGE, {
-        type: "error",
-        message: "You have been kicked",
+        type: "info",
+        message: "You have been promoted has leader",
       });
-
-      player.disconnect();
-
-      game.removePlayerById(player.id);
 
       socket.emit(events.MESSAGE, {
         type: "success",
-        message: "Player kicked out!",
+        message: "Player promoted!",
       });
     } else {
       socket.emit(events.MESSAGE, {

@@ -32,6 +32,22 @@ export default {
         return this.$store.state.gameId;
       },
     },
+    midiDevices: {
+      set(devices) {
+        this.$store.commit("storeMidiDevices", devices);
+      },
+      get() {
+        return this.$store.state.midiDevices;
+      },
+    },
+    midiDevice: {
+      set(device) {
+        this.$store.commit("storeMidiDevice", device);
+      },
+      get() {
+        return this.$store.state.midiDevice;
+      },
+    },
     gameState() {
       return this.game ? this.game.state : null;
     },

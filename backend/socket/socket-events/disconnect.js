@@ -11,11 +11,14 @@ module.exports = (gameContext) => {
       if (game.state === gameStates.WAITING_PLAYERS) {
         if (me) {
           game.removePlayerById(me.id);
+
+          game.emit(events.PLAYER_DISCONNECTED, me.toClientResource());
         }
       } else {
         if (me) {
           me.detachSocket();
           game.gameUpdate();
+          game.emit(events.PLAYER_DISCONNECTED, me.toClientResource());
         }
       }
     }

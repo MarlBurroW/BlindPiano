@@ -9,6 +9,25 @@ class Game {
     this.state = gameStates.WAITING_PLAYERS;
     this.leaderId = null;
     this.io = null;
+    this.playerColors = [
+      "#F44336",
+      "#E91E63",
+      "#9C27B0",
+      "#673AB7",
+      "#3F51B5",
+      "#2196F3",
+      "#03A9F4",
+      "#00BCD4",
+      "#009688",
+      "#4CAF50",
+      "#CDDC39",
+      "#FFEB3B",
+      "#FFC107",
+      "#FF9800",
+      "#FF5722",
+      "#795548",
+      "#607D8B",
+    ];
   }
 
   setIO(io) {
@@ -42,8 +61,17 @@ class Game {
     }
   }
 
+  getAvailableColor() {
+    const alreadyUsedColors = this.players
+      .filter((p) => p.color)
+      .map((p) => p.color);
+
+    return _.difference(this.playerColors, alreadyUsedColors);
+  }
+
   addPlayer(player) {
     this.players.push(player);
+    player.setColor(_.sample(this.getAvailableColor()));
     this.electNewLeaderIfNeeded();
     this.emptyCheck();
     this.gameUpdate();
@@ -110,6 +138,13 @@ class Game {
   start() {
     this.setState("running");
     this.gameUpdate();
+  }
+
+  promote(player) {
+    if (this.findPlayerById(player.id)) {
+      this.leaderId = player.id;
+      this.gameUpdate();
+    }
   }
 
   toClientResource() {

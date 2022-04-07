@@ -4,8 +4,12 @@ class Player {
     this.nickname = nickname;
     this.socket = null;
     this.claimToken = this.createToken();
-
+    this.color = null;
     this.avatar = avatar;
+  }
+
+  setColor(color) {
+    this.color = color;
   }
 
   isLeaderOf(game) {
@@ -56,6 +60,7 @@ class Player {
       online: this.isOnline(),
       nickname: this.nickname,
       avatar: this.avatar,
+      color: this.color,
     };
   }
 }

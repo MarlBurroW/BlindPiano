@@ -20,6 +20,7 @@
                 :me="me"
                 :game="game"
                 @kick="kick($event)"
+                @promote="promote($event)"
               ></player-card>
             </v-col>
           </v-row>
@@ -39,12 +40,7 @@
       </v-card-actions>
       <v-divider></v-divider>
       <v-card-actions class="justify-end" v-if="isLeader">
-        <v-btn
-          :disabled="game.players.length < 2"
-          v-if="isLeader"
-          class="primary"
-          @click="startGame"
-        >
+        <v-btn v-if="isLeader" class="primary" @click="startGame">
           Start <v-icon right>mdi-send-outline</v-icon></v-btn
         >
       </v-card-actions>
@@ -66,6 +62,9 @@ export default {
     },
     kick(player) {
       this.socket.emit(events.KICK_PLAYER, player.id);
+    },
+    promote(player) {
+      this.socket.emit(events.PROMOTE, player.id);
     },
   },
   computed: {

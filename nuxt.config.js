@@ -21,7 +21,12 @@ export default {
   css: ["notyf/notyf.min.css"],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: ["~/plugins/init.js", "~/plugins/socket.js"],
+  plugins: [
+    "~/plugins/init.js",
+    "~/plugins/socket.js",
+    "~/plugins/sfx.js",
+    "~/plugins/midi-api.js",
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -40,7 +45,17 @@ export default {
   modules: ["@nuxtjs/axios"],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    extend(config, ctx) {
+      config.module.rules.push({
+        test: /\.(ogg|mp3|wav|mpe?g)$/i,
+        loader: "file-loader",
+        options: {
+          name: "[path][name].[ext]",
+        },
+      });
+    },
+  },
   axios: {
     baseURL: "/", // Used as fallback if no runtime config is provided
   },

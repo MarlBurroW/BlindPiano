@@ -46,9 +46,14 @@
                 v-if="isLeader && player.id !== me.id"
                 @click="kick(player)"
               >
-                <v-list-item-title
-                  >Kick {{ player.nickname }}</v-list-item-title
-                >
+                <v-list-item-title>Kick </v-list-item-title>
+              </v-list-item>
+
+              <v-list-item
+                v-if="isLeader && player.id !== me.id"
+                @click="promote(player)"
+              >
+                <v-list-item-title>Promote</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -60,9 +65,17 @@
 
 <script>
 import contextMixin from "../mixins/context-mixin";
-
+import events from "../events";
 export default {
   mixins: [contextMixin],
+  methods: {
+    kick(player) {
+      this.socket.emit(events.KICK_PLAYER, player.id);
+    },
+    promote(player) {
+      this.socket.emit(events.PROMOTE, player.id);
+    },
+  },
 };
 </script>
 

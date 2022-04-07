@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="fill-height">
     <v-app-bar app clipped-left clipped-right>
       <v-toolbar-title>Blind PIano</v-toolbar-title>
 
@@ -7,8 +7,13 @@
     </v-app-bar>
     <left-sidebar></left-sidebar>
 
-    <v-main>
-      <v-container v-if="game" class="py-8 px-6" fluid> </v-container>
+    <v-main app class="fill-height">
+      <div class="d-flex flex-column fill-height">
+        <div class="flex-grow-1">zef</div>
+        <v-container class="px-0 py-0" v-if="game" fluid>
+          <Keyboard></Keyboard>
+        </v-container>
+      </div>
     </v-main>
     <right-sidebar></right-sidebar>
     <WaitPlayers></WaitPlayers>
@@ -69,6 +74,7 @@ export default {
       this.me = me;
       this.game = game;
       this.joinDialog = false;
+      this.$playSFX("new-player");
     });
 
     this.socket.on(events.GAME_ALREADY_STARTED, () => {
@@ -78,6 +84,14 @@ export default {
 
     this.socket.on(events.CHAT_MESSAGE, (message) => {
       this.$store.commit("addChatMessage", message);
+    });
+
+    this.socket.on(events.PLAYER_JOINED, (message) => {
+      this.$playSFX("new-player");
+    });
+
+    this.socket.on(events.PLAYER_DISCONNECTED, (message) => {
+      this.$playSFX("player-disconnect");
     });
   },
 

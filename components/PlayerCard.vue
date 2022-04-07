@@ -17,7 +17,10 @@
 
         <v-list>
           <v-list-item @click="kick(player)">
-            <v-list-item-title>Kick {{ player.nickname }}</v-list-item-title>
+            <v-list-item-title>Kick </v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="promote(player)">
+            <v-list-item-title>Promote </v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
@@ -62,6 +65,9 @@ export default {
   methods: {
     kick(player) {
       this.$emit("kick", player);
+    },
+    promote(player) {
+      this.$emit("promote", player);
     },
   },
 };

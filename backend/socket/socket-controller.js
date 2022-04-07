@@ -9,6 +9,7 @@ const joinGame = require("./socket-events/join-game");
 const kickPlayer = require("./socket-events/kick-player");
 const startGame = require("./socket-events/start-game");
 const chatMessage = require("./socket-events/chat-message");
+const promote = require("./socket-events/promote");
 
 const events = require("../../events");
 
@@ -30,6 +31,14 @@ module.exports = {
       socket.on(events.KICK_PLAYER, kickPlayer(gameContext));
       socket.on(events.START_GAME, startGame(gameContext));
       socket.on(events.CHAT_MESSAGE, chatMessage(gameContext));
+      socket.on(events.PROMOTE, promote(gameContext));
+      socket.on(events.KEY_PRESSED, (key) => {
+        gameContext.socket.broadcast.emit(events.KEY_PRESSED, key);
+      });
+
+      socket.on(events.KEY_RELEASED, (key) => {
+        gameContext.socket.broadcast.emit(events.KEY_RELEASED, key);
+      });
     });
   },
 };
