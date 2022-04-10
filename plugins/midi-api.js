@@ -9,19 +9,5 @@ export default async (app, inject) => {
       console.log(err);
     });
 
-  app.store.commit("storeMidiDevices", WebMidi.inputs);
-
-  if (!app.store.state.midiDevice && WebMidi.inputs.length > 0) {
-    app.store.commit("storeMidiDevice", WebMidi.inputs[0]);
-  }
-
-  WebMidi.addListener("portschanged", () => {
-    app.store.commit("storeMidiDevices", WebMidi.inputs);
-
-    if (!app.store.state.midiDevice && WebMidi.inputs.length > 0) {
-      app.store.commit("storeMidiDevice", WebMidi.inputs[0]);
-    }
-  });
-
   inject("webMidi", WebMidi);
 };

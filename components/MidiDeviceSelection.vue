@@ -24,13 +24,16 @@ export default {
   mounted() {},
   computed: {
     deviceItems() {
-      return this.midiDevices.map((d) => {
-        return {
-          text: `${d.manufacturer} - ${d.name}`,
-          value: d.id,
-          device: d,
-        };
-      });
+      return [
+        { text: "None", value: null },
+        ...this.midiDevices.map((d) => {
+          return {
+            text: `${d.manufacturer} - ${d.name}`,
+            value: d.id,
+            device: d,
+          };
+        }),
+      ];
     },
   },
   methods: {},

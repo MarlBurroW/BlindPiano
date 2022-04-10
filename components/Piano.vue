@@ -7,12 +7,15 @@
         <div
           :key="midi"
           v-for="(key, midi) in keys"
-          :class="`key ${key.pc} ${key.alt == 0 ? 'white' : 'black'} ${
+          :class="`key ${key.pc} ${key.alt == 0 ? 'white-key' : 'black-key'} ${
             key.active ? 'active' : ''
           }`"
           @mousedown="keyMouseDown(key)"
           @mouseup="keyMouseUp(key)"
           @mouseleave="keyMouseUp(key)"
+          :style="
+            key.active && key.color ? `background: ${key.color} !important` : ``
+          "
         ></div>
       </div>
     </div>
@@ -40,6 +43,11 @@ export default {
   computed: {},
 
   methods: {
+    getKeyFromMidi(midiKeyCode) {
+      const key = this.keys[midiKeyCode];
+      return { name: key.name, midi: key.midi };
+    },
+
     startDragArea(e) {
       e.dataTransfer.dropEffect = "move";
       e.dataTransfer.effectAllowed = "move";
@@ -61,13 +69,16 @@ export default {
     },
 
     keyMouseUp(key) {
-      this.releaseKey(key.midi);
-      this.emitKeyReleased(key);
+      if (key.active) {
+        this.releaseKey(key.midi);
+        this.emitKeyReleased(key);
+      }
     },
 
-    pressKey(midiKeyCode) {
+    pressKey(midiKeyCode, color) {
       const key = this.keys[midiKeyCode];
       if (key) {
+        key.color = color;
         key.active = true;
       }
     },
@@ -75,6 +86,7 @@ export default {
       const key = this.keys[midiKeyCode];
       if (key.active) {
         key.active = false;
+        key.color = null;
       }
     },
 
@@ -108,13 +120,13 @@ export default {
     .keys {
       .key {
         border-radius: 0 0 0 0;
-        &.white {
+        &.white-key {
           height: calc(200px / 4);
           width: calc(50px / 4);
           min-width: calc(50px / 4);
         }
 
-        &.black {
+        &.black-key {
           height: calc(125px / 4);
           width: calc(25px / 4);
           min-width: calc(25px / 4);
@@ -134,7 +146,7 @@ export default {
 }
 .keys {
   display: flex;
-  overflow-y: scroll;
+
   .key {
     color: black;
 
@@ -146,7 +158,7 @@ export default {
       margin-right: -25px;
     }
 
-    &.white {
+    &.white-key {
       height: 200px;
       width: 50px;
       min-width: 50px;
@@ -167,7 +179,7 @@ export default {
       }
     }
 
-    &.black {
+    &.black-key {
       height: 125px;
       width: 25px;
       min-width: 25px;

@@ -6,6 +6,11 @@ class Player {
     this.claimToken = this.createToken();
     this.color = null;
     this.avatar = avatar;
+    this.deviceName = null;
+  }
+
+  setDeviceName(name) {
+    this.deviceName = name;
   }
 
   setColor(color) {
@@ -61,6 +66,7 @@ class Player {
       nickname: this.nickname,
       avatar: this.avatar,
       color: this.color,
+      deviceName: this.deviceName,
     };
   }
 }

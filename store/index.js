@@ -7,9 +7,19 @@ export const state = () => ({
   chatMessages: [],
   midiDevices: [],
   midiDevice: null,
+  leftDrawer: true,
+  rightDrawer: true,
 });
 
 export const mutations = {
+  storeLeftDrawer(state, leftDrawer) {
+    state.leftDrawer = leftDrawer;
+  },
+
+  storeRightDrawer(state, rightDrawer) {
+    state.rightDrawer = rightDrawer;
+  },
+
   storeClaimToken(state, claimToken) {
     state.claimToken = claimToken;
   },
@@ -30,6 +40,10 @@ export const mutations = {
     state.midiDevices = devices;
   },
   storeMidiDevice(state, device) {
+    if (state.midiDevice) {
+      state.midiDevice.removeListener();
+    }
+
     state.midiDevice = device;
   },
 };

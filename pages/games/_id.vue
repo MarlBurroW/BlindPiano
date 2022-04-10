@@ -1,17 +1,21 @@
 <template>
   <div class="fill-height">
-    <v-app-bar app clipped-left clipped-right>
-      <v-toolbar-title>Blind PIano</v-toolbar-title>
-
-      <v-spacer></v-spacer>
-    </v-app-bar>
+    <AppBar></AppBar>
     <left-sidebar></left-sidebar>
 
     <v-main app class="fill-height">
       <div class="d-flex flex-column fill-height">
-        <div class="flex-grow-1">zef</div>
+        <div class="flex-grow-1"></div>
         <v-container class="px-0 py-0" v-if="game" fluid>
-          <Keyboard></Keyboard>
+          <Instrument
+            :volume="volume"
+            :event-bus="keyboardEventBus"
+          ></Instrument>
+
+          <Keyboard
+            :volume.sync="volume"
+            :event-bus="keyboardEventBus"
+          ></Keyboard>
         </v-container>
       </div>
     </v-main>
@@ -29,6 +33,7 @@
 import contextMixin from "../../mixins/context-mixin";
 import { io } from "socket.io-client";
 import events from "../../events";
+import EventEmitter from "events";
 
 export default {
   layout: "default",
@@ -74,7 +79,10 @@ export default {
       this.me = me;
       this.game = game;
       this.joinDialog = false;
+
       this.$playSFX("new-player");
+
+      this.startDevice();
     });
 
     this.socket.on(events.GAME_ALREADY_STARTED, () => {
@@ -93,9 +101,23 @@ export default {
     this.socket.on(events.PLAYER_DISCONNECTED, (message) => {
       this.$playSFX("player-disconnect");
     });
+
+    this.keyboardEventBus.on("key-pressed", (key) => {
+      this.socket.emit(events.KEY_PRESSED, key);
+    });
+
+    this.keyboardEventBus.on("key-released", (key) => {
+      this.socket.emit(events.KEY_RELEASED, key);
+    });
   },
 
   watch: {
+    midiDevice(midiDevice) {
+      this.socket.emit(
+        events.UPDATE_DEVICE_NAME,
+        midiDevice ? midiDevice.name : null
+      );
+    },
     gameState(state, oldState) {
       if (state == "running") {
         window.localStorage.setItem(this.game.id, this.claimToken);
@@ -104,6 +126,24 @@ export default {
   },
 
   methods: {
+    startDevice() {
+      this.midiDevices = this.$webMidi.inputs;
+
+      this.autoSelectDevice();
+
+      this.$webMidi.addListener("portschanged", () => {
+        this.midiDevices = this.$webMidi.inputs;
+
+        this.autoSelectDevice();
+      });
+    },
+
+    autoSelectDevice() {
+      if (!this.$store.state.midiDevice && this.$webMidi.inputs.length > 0) {
+        this.midiDevice = this.$webMidi.inputs[0];
+      }
+    },
+
     kick(player) {
       this.socket.emit(events.KICK_PLAYER, player.id);
     },
@@ -122,6 +162,8 @@ export default {
   },
   data() {
     return {
+      keyboardEventBus: new EventEmitter(),
+      volume: 0,
       joinDialog: false,
     };
   },

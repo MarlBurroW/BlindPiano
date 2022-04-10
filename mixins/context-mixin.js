@@ -61,6 +61,23 @@ export default {
     chatMessages() {
       return this.$store.state.chatMessages;
     },
+
+    leftDrawer: {
+      set(drawer) {
+        this.$store.commit("storeLeftDrawer", drawer);
+      },
+      get() {
+        return this.$store.state.leftDrawer;
+      },
+    },
+    rightDrawer: {
+      set(drawer) {
+        this.$store.commit("storeRightDrawer", drawer);
+      },
+      get() {
+        return this.$store.state.rightDrawer;
+      },
+    },
   },
   methods: {},
 };
