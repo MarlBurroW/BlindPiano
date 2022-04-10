@@ -1,16 +1,20 @@
 <template>
-  <div class="piano">
-    <div class="keys" v-dragscroll>
-      <div
-        :key="key.midi"
-        v-for="key in visibleKeys"
-        :class="`key ${key.pc} ${key.alt == 0 ? 'white' : 'black'} ${
-          key.active ? 'active' : ''
-        }`"
-        @mousedown="keyMouseDown(key)"
-        @mouseup="keyMouseUp(key)"
-        @mouseleave="keyMouseUp(key)"
-      ></div>
+  <div>
+    <!-- <div v-if="!slider">Total Width: {{ totalWidth }}</div>
+    <div v-if="!slider">Visible Width: {{ visibleWidth }}</div> -->
+    <div class="piano" :class="{ small: this.small }">
+      <div class="keys" ref="keys">
+        <div
+          :key="midi"
+          v-for="(key, midi) in keys"
+          :class="`key ${key.pc} ${key.alt == 0 ? 'white' : 'black'} ${
+            key.active ? 'active' : ''
+          }`"
+          @mousedown="keyMouseDown(key)"
+          @mouseup="keyMouseUp(key)"
+          @mouseleave="keyMouseUp(key)"
+        ></div>
+      </div>
     </div>
   </div>
 </template>
@@ -18,61 +22,68 @@
 <script>
 import { Midi, Note } from "@tonaljs/tonal";
 import _ from "lodash";
+import interact from "interactjs";
+
 export default {
-  computed: {
-    test() {
-      return Note.get("C4");
+  mounted() {},
+  props: {
+    small: {
+      type: Boolean,
+      default: false,
     },
-    endOctave() {
-      return this.startOctave + this.displayedOctaves;
-    },
-
-    visibleKeys() {
-      return this.keys.filter((key) => {
-        return key.oct >= this.startOctave && key.oct < this.endOctave;
-      });
-    },
-
-    indexedKeys() {
-      const keys = {};
-      for (let i = 0; i < this.keys.length; i++) {
-        const key = this.keys[i];
-        keys[key.midi] = key;
-      }
-      return keys;
+    scrollPosition: {
+      type: Number,
+      required: false,
     },
   },
+  watch: {},
+  computed: {},
 
   methods: {
+    startDragArea(e) {
+      e.dataTransfer.dropEffect = "move";
+      e.dataTransfer.effectAllowed = "move";
+    },
+    emitKeyPressed(key) {
+      const keyPayload = { name: key.name, midi: key.midi, velocity: 0.5 };
+
+      this.$emit("key-pressed", keyPayload);
+    },
+    emitKeyReleased(key) {
+      const keyPayload = { name: key.name, midi: key.midi, velocity: 0.5 };
+
+      this.$emit("key-released", keyPayload);
+    },
+
     keyMouseDown(key) {
       this.pressKey(key.midi, 1);
+      this.emitKeyPressed(key);
     },
 
     keyMouseUp(key) {
       this.releaseKey(key.midi);
+      this.emitKeyReleased(key);
     },
 
-    pressKey(midiKeyNumber, velocity, preventEmit) {
-      const key = this.indexedKeys[midiKeyNumber];
-      key.active = true;
-
-      this.$emit("key-pressed", { key, velocity, preventEmit });
+    pressKey(midiKeyCode) {
+      const key = this.keys[midiKeyCode];
+      if (key) {
+        key.active = true;
+      }
     },
-    releaseKey(midiKeyNumber, preventEmit) {
-      const key = this.indexedKeys[midiKeyNumber];
+    releaseKey(midiKeyCode) {
+      const key = this.keys[midiKeyCode];
       if (key.active) {
         key.active = false;
-
-        this.$emit("key-released", { key, preventEmit });
       }
     },
 
-    buildKeys() {
-      const keys = [];
-      for (let i = 21; i <= 108; i++) {
+    buildKeys(start, end) {
+      const keys = {};
+      for (let i = start; i <= end; i++) {
         const key = Note.get(Note.fromMidi(i));
         key.active = false;
-        keys.push(key);
+        keys[key.midi] = key;
       }
 
       return keys;
@@ -83,7 +94,7 @@ export default {
     return {
       startOctave: 0,
       displayedOctaves: 9,
-      keys: this.buildKeys(),
+      keys: this.buildKeys(21, 108),
     };
   },
 };
@@ -91,10 +102,37 @@ export default {
 
 <style scoped lang="scss">
 .piano {
-  width: 100%;
+  position: relative;
+
+  &.small {
+    .keys {
+      .key {
+        border-radius: 0 0 0 0;
+        &.white {
+          height: calc(200px / 4);
+          width: calc(50px / 4);
+          min-width: calc(50px / 4);
+        }
+
+        &.black {
+          height: calc(125px / 4);
+          width: calc(25px / 4);
+          min-width: calc(25px / 4);
+          left: calc(12.5px / 4);
+        }
+
+        &.C,
+        &.D,
+        &.F,
+        &.G,
+        &.A {
+          margin-right: calc(-25px / 4);
+        }
+      }
+    }
+  }
 }
 .keys {
-  width: 100%;
   display: flex;
   overflow-y: scroll;
   .key {

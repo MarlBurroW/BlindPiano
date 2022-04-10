@@ -5,11 +5,16 @@ import Vue from "vue";
 import VueClipboard from "vue-clipboard2";
 import Avataaars from "vue-avataaars";
 import VueChatScroll from "vue-chat-scroll";
-import VueDragscroll from "vue-dragscroll";
+
+import vuescroll from "vuescroll";
+import drag from "v-drag";
+
 export default async (app, inject) => {
   Vue.component(Avataaars);
   Vue.use(VueChatScroll);
-  Vue.use(VueDragscroll);
+
+  Vue.use(drag);
+  Vue.use(vuescroll);
   const notyf = new Notyf({
     duration: 5000,
     ripple: true,
