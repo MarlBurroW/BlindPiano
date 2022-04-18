@@ -4,24 +4,56 @@
     <left-sidebar></left-sidebar>
 
     <v-main app class="fill-height">
-      <div class="d-flex flex-column fill-height">
-        <div class="flex-grow-1"></div>
-        <v-container class="px-0 py-0" v-if="game" fluid>
-          <Instrument
-            :volume="volume"
-            :event-bus="keyboardEventBus"
-          ></Instrument>
+      <v-toolbar dense v-if="game && game.state && game.state.turn">
+        <v-toolbar-title v-if="currentRound">
+          Round {{ currentRound.number }}/{{ game.roundCount }}
+        </v-toolbar-title>
 
-          <Keyboard
-            :volume.sync="volume"
-            :event-bus="keyboardEventBus"
-          ></Keyboard>
-        </v-container>
-      </div>
+        <v-toolbar-title v-if="currentTurnPlayer">
+          &nbsp;|&nbsp;
+          <span :style="{ color: currentTurnPlayer.color }">{{
+            currentTurnPlayer.nickname
+          }}</span
+          >'s turn
+        </v-toolbar-title>
+
+        <v-toolbar-title v-if="countDown">
+          &nbsp;|&nbsp;<strong>{{ countDown }}</strong> second(s) left
+        </v-toolbar-title>
+      </v-toolbar>
+      <vue-scroll :ops="scrollOptions">
+        <div class="d-flex flex-column fill-height">
+          <div class="flex-grow-1" v-if="game">
+            <zoom-center-transition mode="out-in">
+              <WaitPlayers
+                v-if="gameState.type == gameStates.WAITING_PLAYERS"
+              ></WaitPlayers>
+
+              <PreTurn
+                v-else-if="gameState.type == gameStates.PRE_TURN"
+              ></PreTurn>
+              <LearnSong
+                v-else-if="gameState.type == gameStates.LEARNING_SONG"
+              ></LearnSong>
+
+              <PlaySong
+                v-else-if="gameState.type == gameStates.PLAY_SONG"
+              ></PlaySong>
+
+              <ScoreScreen
+                v-else-if="gameState.type == gameStates.SCORE_SCREEN"
+              ></ScoreScreen>
+            </zoom-center-transition>
+          </div>
+        </div>
+      </vue-scroll>
     </v-main>
     <right-sidebar></right-sidebar>
-    <WaitPlayers></WaitPlayers>
+    <v-footer app padless v-if="game && socket">
+      <Instrument :volume="volume" :event-bus="keyboardEventBus"></Instrument>
 
+      <Keyboard :volume.sync="volume" :event-bus="keyboardEventBus"></Keyboard>
+    </v-footer>
     <JoinGameDialog
       @user-created="joinGameSocket(gameId, $event)"
       :open="joinDialog"
@@ -42,10 +74,6 @@ export default {
 
   mounted() {
     this.gameId = this.$route.params.id;
-
-    if (!this.claimToken) {
-      this.claimToken = window.localStorage.getItem(this.gameId);
-    }
 
     const socket = io();
     this.$setSocketInstance(socket);
@@ -79,9 +107,7 @@ export default {
       this.me = me;
       this.game = game;
       this.joinDialog = false;
-
       this.$playSFX("new-player");
-
       this.startDevice();
     });
 
@@ -90,7 +116,22 @@ export default {
       this.$router.push({ name: "index" });
     });
 
+    this.socket.on(events.GAME_FINISHED, () => {
+      this.$notyf.error("Game finished.");
+      this.$router.push({ name: "index" });
+    });
+
+    this.socket.on(events.GAME_NOT_FOUND, () => {
+      this.$notyf.error("Game not found.");
+      this.$router.push({ name: "index" });
+    });
+
     this.socket.on(events.CHAT_MESSAGE, (message) => {
+      this.$store.commit("addChatMessage", message);
+    });
+
+    this.socket.on(events.LOG, (message) => {
+      console.log(message);
       this.$store.commit("addChatMessage", message);
     });
 
@@ -109,6 +150,18 @@ export default {
     this.keyboardEventBus.on("key-released", (key) => {
       this.socket.emit(events.KEY_RELEASED, key);
     });
+
+    this.socket.on(events.UPDATE_TIMER, (timer) => {
+      this.turnTimer = timer;
+    });
+
+    this.socket.on(events.PLAY_SFX, (sfxName) => {
+      this.$playSFX(sfxName);
+    });
+
+    this.socket.on(events.PRIVATE_TURN_INFO, (turnInfo) => {
+      this.turnInfo = turnInfo;
+    });
   },
 
   watch: {
@@ -118,11 +171,7 @@ export default {
         midiDevice ? midiDevice.name : null
       );
     },
-    gameState(state, oldState) {
-      if (state == "running") {
-        window.localStorage.setItem(this.game.id, this.claimToken);
-      }
-    },
+    gameState(state, oldState) {},
   },
 
   methods: {
@@ -165,10 +214,53 @@ export default {
       keyboardEventBus: new EventEmitter(),
       volume: 0,
       joinDialog: false,
+      turnTimer: 0,
+
+      scrollOptions: {
+        bar: {
+          showDelay: 500,
+          onlyShowBarOnScroll: true,
+          keepShow: false,
+          background: "#121212",
+          opacity: 1,
+          hoverStyle: false,
+          specifyBorderRadius: false,
+          minSize: 0,
+          size: "6px",
+          disable: false,
+        },
+        vuescroll: {
+          mode: "native",
+          sizeStrategy: "percent",
+          detectResize: true,
+          zooming: false,
+
+          scroller: {
+            bouncing: {
+              left: 0,
+              right: 0,
+            },
+          },
+        },
+        scrollPanel: {
+          scrollingX: false,
+          scrollingY: true,
+        },
+      },
     };
   },
 };
 </script>
 
-<style>
+<style scoped lang="scss">
+/* we will explain what these classes do next! */
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
 </style>

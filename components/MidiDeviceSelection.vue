@@ -28,7 +28,7 @@ export default {
         { text: "None", value: null },
         ...this.midiDevices.map((d) => {
           return {
-            text: `${d.manufacturer} - ${d.name}`,
+            text: `${d.name}`,
             value: d.id,
             device: d,
           };

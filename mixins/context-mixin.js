@@ -1,5 +1,11 @@
+import gameStates from "../game_states";
+
 export default {
   computed: {
+    gameStates() {
+      return gameStates;
+    },
+
     me: {
       set(me) {
         this.$store.commit("storeMe", me);
@@ -14,6 +20,14 @@ export default {
       },
       get() {
         return this.$store.state.game;
+      },
+    },
+    turnInfo: {
+      set(turnInfo) {
+        this.$store.commit("storePrivateTurnInfo", turnInfo);
+      },
+      get() {
+        return this.$store.state.privateTurnInfo;
       },
     },
     claimToken: {
@@ -62,6 +76,38 @@ export default {
       return this.$store.state.chatMessages;
     },
 
+    currentRound() {
+      return this.game && this.game.state && this.game.state.round
+        ? this.game.state.round
+        : null;
+    },
+
+    currentTurnPlayer() {
+      return this.game.players.find(
+        (p) => p.id === this.game.state.turn.playerId
+      );
+    },
+
+    currentTurn() {
+      return this.game && this.game.state && this.game.state.turn
+        ? this.game.state.turn
+        : null;
+    },
+
+    isMyTurn() {
+      return (
+        this.game &&
+        this.game.state &&
+        this.game.state.turn &&
+        this.game.state.turn.playerId == this.me.id
+      );
+    },
+    countDown() {
+      return this.game && this.game.state && this.game.state.countDown
+        ? this.game.state.countDown
+        : null;
+    },
+
     leftDrawer: {
       set(drawer) {
         this.$store.commit("storeLeftDrawer", drawer);
@@ -78,6 +124,31 @@ export default {
         return this.$store.state.rightDrawer;
       },
     },
+
+    scoreOrderedPlayers() {
+      if (this.game && this.game.players) {
+        return this.game.players
+          .map((p) => {
+            p.score = this.game.scores[p.id];
+            return p;
+          })
+          .sort((a, b) => {
+            return b.score - a.score;
+          });
+      } else {
+        return [];
+      }
+    },
   },
-  methods: {},
+  methods: {
+    getPlayerArtistGuessState(playerId) {
+      return this.turn.artistWins[playerId];
+    },
+    getPlayerSongGuessState(playerId) {
+      return this.turn.songWins[playerId];
+    },
+    getPlayerScore(playerId) {
+      return this.game.scores[playerId] || 0;
+    },
+  },
 };

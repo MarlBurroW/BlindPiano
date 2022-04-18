@@ -1,6 +1,6 @@
 <template>
-  <v-navigation-drawer :value="leftDrawer" width="350" app clipped>
-    <player-list v-if="game" :players="game.players"></player-list>
+  <v-navigation-drawer v-model="leftDrawer" width="350" app clipped>
+    <player-list v-if="game" :players="scoreOrderedPlayers"></player-list>
   </v-navigation-drawer>
 </template>
 

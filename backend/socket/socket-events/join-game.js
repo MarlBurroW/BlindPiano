@@ -6,30 +6,25 @@ module.exports = (gameContext) => {
     const game = gameContext.getApp().gameManager.findGameById(gameId);
     const socket = gameContext.getSocket();
 
-    if (game) {
-      gameContext.setGame(game);
-    } else {
+    if (!game) {
       socket.emit(events.GAME_NOT_FOUND);
       return;
     }
+
+    if (game && game.getStateKey() == gameStates.FINISHED) {
+      socket.emit(events.GAME_FINISHED);
+      return;
+    }
+
+    gameContext.setGame(game);
 
     const me = game.findPlayerByClaimToken(claimToken);
 
     if (me) {
       gameContext.setMe(me);
     } else {
-      if (game.getState() !== gameStates.WAITING_PLAYERS) {
-        socket.emit(events.GAME_ALREADY_STARTED);
-        return;
-      }
-
       socket.emit(events.ASK_NICKNAME);
       return;
-    }
-
-    // Kill previous socket attached
-    if (me.isOnline()) {
-      me.disconnect();
     }
 
     me.attachSocket(socket);

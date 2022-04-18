@@ -1,10 +1,32 @@
 <template>
-  <v-dialog max-width="800" persistent :value="open">
-    <v-card class="elevation-12">
-      <v-toolbar dark>
-        <v-toolbar-title>Invite your friends</v-toolbar-title>
-      </v-toolbar>
+  <div class="waiting-players-screen fill-height">
+    <v-card fill-height class="fill-height pa-10">
+      <v-card-title>
+        <h1>Waiting for players</h1>
+        <v-spacer></v-spacer>
+        <v-btn
+          x-large
+          v-if="isLeader"
+          :disabled="game.players.length < 2"
+          class="primary"
+          @click="startGame"
+        >
+          Start Game
+        </v-btn>
+      </v-card-title>
+      <v-divider class="mb-5"></v-divider>
       <v-card-text v-if="game">
+        <v-text-field
+          label="Invitation link"
+          readonly
+          outlined
+          rounded
+          :value="$gameLink(game)"
+          append-icon="mdi-link"
+          v-clipboard:copy="$gameLink(game)"
+          v-clipboard:success="() => $notyf.success('Link copied')"
+        ></v-text-field>
+
         <v-list subheader>
           <v-subheader
             >{{ game.players.length }}
@@ -13,7 +35,14 @@
           >
 
           <v-row>
-            <v-col cols="4" :key="player.id" v-for="player in game.players">
+            <v-col
+              xs="12"
+              sm="12"
+              md="6"
+              lg="4"
+              :key="player.id"
+              v-for="player in game.players"
+            >
               <player-card
                 :leader="player.id === game.leaderId"
                 :player="player"
@@ -26,26 +55,8 @@
           </v-row>
         </v-list>
       </v-card-text>
-      <v-card-actions class="justify-end">
-        <v-text-field
-          label="Invitation link"
-          readonly
-          outlined
-          rounded
-          :value="$gameLink(game)"
-          append-icon="mdi-link"
-          v-clipboard:copy="$gameLink(game)"
-          v-clipboard:success="() => $notyf.success('Link copied')"
-        ></v-text-field>
-      </v-card-actions>
-      <v-divider></v-divider>
-      <v-card-actions class="justify-end" v-if="isLeader">
-        <v-btn v-if="isLeader" class="primary" @click="startGame">
-          Start <v-icon right>mdi-send-outline</v-icon></v-btn
-        >
-      </v-card-actions>
     </v-card>
-  </v-dialog>
+  </div>
 </template>
 
 <script>
@@ -67,13 +78,15 @@ export default {
       this.socket.emit(events.PROMOTE, player.id);
     },
   },
-  computed: {
-    open() {
-      return this.game && this.game.state === gameStates.WAITING_PLAYERS;
-    },
+  computed: {},
+
+  data() {
+    return {};
   },
 };
 </script>
 
-<style>
+<style scoped lang="scss">
+.waiting-players-screen {
+}
 </style>

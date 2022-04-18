@@ -7,8 +7,6 @@ module.exports = (gameContext) => {
 
     const me = gameContext.getMe();
 
-    const chatMessage = new ChatMessage(me, message);
-
-    game.emit(events.CHAT_MESSAGE, chatMessage.toClientResource());
+    game.chatMessage(me, message);
   };
 };

@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer :value="rightDrawer" width="350" app right clipped>
+  <v-navigation-drawer v-model="rightDrawer" width="350" app right clipped>
     <chat></chat>
   </v-navigation-drawer>
 </template>

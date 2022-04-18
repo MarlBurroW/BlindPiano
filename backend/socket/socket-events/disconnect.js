@@ -7,20 +7,10 @@ module.exports = (gameContext) => {
     const socket = gameContext.getSocket();
     const me = gameContext.getMe();
 
-    if (game) {
-      if (game.state === gameStates.WAITING_PLAYERS) {
-        if (me) {
-          game.removePlayerById(me.id);
+    if (game && me) {
+      game.removePlayerById(me.id);
 
-          game.emit(events.PLAYER_DISCONNECTED, me.toClientResource());
-        }
-      } else {
-        if (me) {
-          me.detachSocket();
-          game.gameUpdate();
-          game.emit(events.PLAYER_DISCONNECTED, me.toClientResource());
-        }
-      }
+      game.emit(events.PLAYER_DISCONNECTED, me.toClientResource());
     }
   };
 };

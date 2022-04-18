@@ -8,11 +8,12 @@ import VueChatScroll from "vue-chat-scroll";
 
 import vuescroll from "vuescroll";
 import drag from "v-drag";
+import Transitions from "vue2-transitions";
 
 export default async (app, inject) => {
   Vue.component(Avataaars);
   Vue.use(VueChatScroll);
-
+  Vue.use(Transitions);
   Vue.use(drag);
   Vue.use(vuescroll);
   const notyf = new Notyf({

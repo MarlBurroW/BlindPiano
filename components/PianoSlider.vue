@@ -48,16 +48,17 @@ export default {
         move: (event) => {
           const nextPosition = this.sliderPosition + event.dx;
 
-          if (nextPosition >= 0) {
-            this.sliderPosition += event.dx;
-          } else {
-            this.sliderPosition = 0;
-          }
+          const limitRight = 650 - this.pixelBarSize;
+          const limitLeft = 0;
 
-          if (nextPosition <= 650 - this.pixelBarSize) {
-            this.sliderPosition += event.dx;
+          if (nextPosition >= limitLeft && nextPosition <= limitRight) {
+            this.sliderPosition = nextPosition;
           } else {
-            this.sliderPosition = 650 - this.pixelBarSize;
+            if (nextPosition < limitLeft) {
+              this.sliderPosition = limitLeft;
+            } else {
+              this.sliderPosition = limitRight;
+            }
           }
 
           const scrollProgress =
@@ -121,6 +122,7 @@ export default {
   position: relative;
   display: flex;
   justify-content: center;
+  padding: 20px 0px;
 }
 
 .slided-piano {
@@ -147,13 +149,14 @@ export default {
     left: 0px;
     right: 0px;
     bottom: 0px;
-    mix-blend-mode: hard-light;
-    background-color: rgba(0, 0, 0, 0.5);
+
     .area {
       width: 100px;
+      transition: width ease 0.3s;
 
-      background-color: rgba(white, 0.3);
       height: 100%;
+
+      outline: 5px solid #2196f3;
     }
   }
 }

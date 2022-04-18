@@ -5,6 +5,7 @@ const apiControllers = [require("./api/games"), require("./api/config")];
 const socketController = require("./socket/socket-controller.js");
 const express = require("express");
 var serveIndex = require("serve-index");
+const songPicker = require("./modules/song-picker");
 
 for (let i = 0; i < apiControllers.length; i++) {
   const controller = apiControllers[i];
@@ -19,5 +20,7 @@ start()
     console.log(listEndpoints(app));
 
     socketController.start();
+
+    songPicker.start();
   })
   .catch(console.log);

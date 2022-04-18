@@ -1,20 +1,26 @@
 <template>
-  <v-card>
-    <MidiDeviceSelection></MidiDeviceSelection>
-
-    <PianoSlider
-      :scroll-progress-percent="scrollProgress"
-      :bar-size-percent="scrollBarSize"
-      @slider-progress-changed="scrollPiano"
-    >
-      <Piano
-        small
-        @key-pressed="keyPressed"
-        @key-released="keyReleased"
-      ></Piano>
-    </PianoSlider>
+  <v-card class="keyboard" color="red darken-4">
+    <v-row>
+      <v-col>
+        <PianoSlider
+          :scroll-progress-percent="scrollProgress"
+          :bar-size-percent="scrollBarSize"
+          @slider-progress-changed="scrollPiano"
+        >
+          <Piano
+            small
+            @key-pressed="keyPressed"
+            @key-released="keyReleased"
+          ></Piano>
+        </PianoSlider>
+      </v-col>
+      <v-col>
+        <MidiDeviceSelection></MidiDeviceSelection>
+      </v-col>
+    </v-row>
 
     <div class="d-flex">
+      <div class="px-5"></div>
       <vue-scroll
         ref="pianoScroller"
         :ops="scrollOptions"
@@ -136,7 +142,7 @@ export default {
           disable: false,
         },
         vuescroll: {
-          mode: "slide",
+          mode: "native",
           sizeStrategy: "percent",
           detectResize: true,
           zooming: false,
@@ -151,6 +157,7 @@ export default {
         scrollPanel: {
           scrollingX: true,
           scrollingY: false,
+          initialScrollX: "50%",
         },
       },
     };
@@ -158,5 +165,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss" scoped>
+.keyboard {
+}
 </style>

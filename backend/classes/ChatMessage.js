@@ -10,6 +10,7 @@ class ChatMessage {
   toClientResource() {
     return {
       id: this.id,
+      type: "player-message",
       nickname: this.player.nickname,
       playerId: this.player.id,
       message: this.message,

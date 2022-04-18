@@ -1,12 +1,10 @@
 <template>
   <div class="pa-5">
     <v-card
-      :style="{ opacity: player.online ? 1 : 0.3 }"
-      :color="player.color"
+      :style="{ borderColor: player.color, opacity: player.online ? 1 : 0.3 }"
       v-for="player in players"
       :key="player.id"
-      shaped
-      class="mb-5"
+      class="mb-5 player-card"
     >
       <div class="d-flex flex-no-wrap">
         <div class="d-flex flex-column justify-center px-3">
@@ -34,6 +32,15 @@
                 player.deviceName ? "mdi-piano" : "mdi-keyboard-outline"
               }}</v-icon>
               {{ player.deviceName ? player.deviceName : "Mouse & Keyboard" }}
+            </div>
+
+            <div v-id="getPlayerScore(player.id)" class="mt-3">
+              <strong
+                style="font-size: 25px"
+                :style="{ color: player.color }"
+                >{{ getPlayerScore(player.id) }}</strong
+              >
+              points
             </div>
           </v-card-text>
         </div>
@@ -91,5 +98,8 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style lang="scss" scoped>
+.player-card {
+  border-left: 10px solid;
+}
+</style> 

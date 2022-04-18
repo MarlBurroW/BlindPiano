@@ -3,7 +3,7 @@ module.exports = (gameContext) => {
     const game = gameContext.getGame();
     const me = gameContext.getMe();
 
-    if (me.isLeaderOf(game)) {
+    if (me && me.isLeaderOf(game)) {
       game.start();
     }
   };

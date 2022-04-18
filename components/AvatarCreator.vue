@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col cols="6" class="py-10">
+    <v-col lg="6" sm="12" xs="12" class="py-10">
       <v-layout align-center justify-center>
         <Avataaars
           :avatar-options="avatarOptions"
@@ -10,10 +10,15 @@
         ></Avataaars>
       </v-layout>
       <v-layout align-center justify-center>
-        <v-btn color="primary" rounded @click="randomize"> Randomize</v-btn>
+        <v-btn class="mx-2" color="primary" rounded @click="randomize">
+          <v-icon left>mdi-dice-multiple</v-icon> Randomize</v-btn
+        >
+        <v-btn class="mx-2" color="primary" rounded @click="save">
+          <v-icon left>mdi-floppy</v-icon>Save as default</v-btn
+        >
       </v-layout>
     </v-col>
-    <v-col cols="6">
+    <v-col lg="6" sm="12" xs="12">
       <v-tabs
         background-color="primary"
         active-class=""
@@ -47,10 +52,20 @@ export default {
   props: {},
 
   created() {
-    this.randomize();
+    const savedAvatar = JSON.parse(window.localStorage.getItem("avatar"));
+    if (savedAvatar) {
+      this.avatarOptions = savedAvatar;
+    } else {
+      this.randomize();
+    }
   },
 
   methods: {
+    save() {
+      window.localStorage.setItem("avatar", JSON.stringify(this.avatarOptions));
+      this.$notyf.success("Avatar saved");
+    },
+
     randomize() {
       for (let i = 0; i < this.options.tabs.length; i++) {
         const tab = this.options.tabs[i];

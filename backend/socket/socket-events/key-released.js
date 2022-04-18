@@ -3,9 +3,10 @@ const events = require("../../../events");
 module.exports = (gameContext) => {
   return (key) => {
     const game = gameContext.getGame();
+    const me = gameContext.getMe();
 
-    const socket = gameContext.getSocket();
-
-    socket.broadcast.to(game.id).emit(events.KEY_RELEASED, key);
+    if (game && me) {
+      game.unpressKey(key, me);
+    }
   };
 };

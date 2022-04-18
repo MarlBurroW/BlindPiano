@@ -3,6 +3,7 @@ export const state = () => ({
   gameId: null,
   game: null,
   me: null,
+  privateTurnInfo: null,
   socket: null,
   chatMessages: [],
   midiDevices: [],
@@ -39,6 +40,11 @@ export const mutations = {
   storeMidiDevices(state, devices) {
     state.midiDevices = devices;
   },
+
+  storePrivateTurnInfo(state, turnInfo) {
+    state.privateTurnInfo = turnInfo;
+  },
+
   storeMidiDevice(state, device) {
     if (state.midiDevice) {
       state.midiDevice.removeListener();

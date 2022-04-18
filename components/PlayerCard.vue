@@ -1,5 +1,9 @@
 <template>
-  <v-card color="grey darken-3">
+  <v-card
+    color="grey darken-3"
+    class="player-card"
+    :style="{ borderTop: `solid 10px ${player.color} !important` }"
+  >
     <v-app-bar flat color="rgba(0, 0, 0, 0)">
       <v-spacer></v-spacer>
       <v-toolbar-title class="text-h6 white--text pl-0">
@@ -76,5 +80,8 @@ export default {
 <style scoped lang="scss">
 .nickname {
   font-size: 25px;
+}
+
+.player-card {
 }
 </style>
