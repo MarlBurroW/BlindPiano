@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div class="d-flex justify-center flex-column align-center fill-height">
+    <div
+      class="d-flex justify-center flex-column align-center fill-height mb-5"
+    >
       <Avataaars
         :avatar-options="player.avatar"
         :height="250"
@@ -21,6 +23,14 @@
       <div class="countdown">
         {{ this.game.state.countDown }}
       </div>
+
+      <v-btn
+        v-if="isMyTurn && this.game.state.countDown > 6"
+        @click="stopLearning"
+        x-large
+        color="primary"
+        >Ok i'm ready</v-btn
+      >
     </div>
 
     <div v-if="turnInfo" class="fill-height">
@@ -43,23 +53,9 @@ import events from "../events";
 export default {
   mixins: [contextMixin],
 
-  beforeUnmount() {
-    this.socket.off(
-      events.UPDATE_LEARNING_COUNTDOWN,
-      this.updateLearningCountdown
-    );
-  },
-
-  created() {
-    this.socket.on(
-      events.UPDATE_LEARNING_COUNTDOWN,
-      this.updateLearningCountdown
-    );
-  },
-
   methods: {
-    updateLearningCountdown(countDown) {
-      this.game.state.countDown = countDown;
+    stopLearning() {
+      this.socket.emit(events.STOP_LEARNING);
     },
   },
 

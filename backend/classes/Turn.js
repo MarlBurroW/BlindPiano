@@ -9,6 +9,10 @@ class Turn {
     this.songWins = {};
   }
 
+  finish() {
+    this.finished = true;
+  }
+
   getPlayer() {
     return this.player;
   }

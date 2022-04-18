@@ -26,25 +26,11 @@ export default {
   mixins: [contextMixin],
   props: {},
 
-  beforeUnmount() {
-    this.socket.off(
-      events.UPDATE_PRETURN_COUNTDOWN,
-      this.updatePreturnCountdown
-    );
-  },
+  beforeUnmount() {},
 
-  mounted() {
-    this.socket.on(
-      events.UPDATE_PRETURN_COUNTDOWN,
-      this.updatePreturnCountdown
-    );
-  },
+  mounted() {},
 
-  methods: {
-    updatePreturnCountdown(countDown) {
-      this.game.state.countDown = countDown;
-    },
-  },
+  methods: {},
 
   computed: {
     player() {

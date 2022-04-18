@@ -83,19 +83,7 @@ export default {
   mixins: [contextMixin],
   props: {},
 
-  beforeUnmount() {
-    this.socket.off(events.UPDATE_PLAY_COUNTDOWN, this.updatePlaySongCountDown);
-  },
-
-  mounted() {
-    this.socket.on(events.UPDATE_PLAY_COUNTDOWN, this.updatePlaySongCountDown);
-  },
-
-  methods: {
-    updatePlaySongCountDown(countDown) {
-      this.game.state.countDown = countDown;
-    },
-  },
+  methods: {},
 
   computed: {
     guessers() {

@@ -18,15 +18,17 @@ class Game {
 
     this.guessArtistPoints = 50;
     this.guessSongPoints = 50;
-    this.someoneGuessMyPlayPoints = 50;
+    this.someoneGuessMyPlayPoints = 60;
 
     this.leaderId = null;
     this.io = null;
-    this.guessSimilarityThreshold = 0.8;
+    this.guessSimilarityThreshold = 0.5;
     this.roundCount = 3;
-    this.learnTime = 20;
-    this.playTime = 20;
-    this.preturnTime = 3;
+    this.learnTime = 60;
+    this.playTime = 60;
+    this.ticTime = 5;
+    this.preturnTime = 5;
+    this.responseTime = 5;
     this.rounds = [];
     this.currentRound = null;
 
@@ -148,16 +150,13 @@ class Game {
       this.emptyCheck();
       this.removeTurnsByPlayerId(player.id);
 
-      if (this.state.type == gameStates.PRE_TURN) {
+      const turn = this.getCurrentTurn();
+      if (turn && turn.player.id == player.id) {
+        turn.finish();
         clearInterval(this.counterInterval);
-      }
 
-      if (this.state.type == gameStates.LEARNING_SONG) {
-        clearInterval(this.counterInterval);
-      }
-
-      if (this.state.type == gameStates.PLAY_SONG) {
-        clearInterval(this.counterInterval);
+        const nextTurn = this.getCurrentTurn();
+        this.startTurn(nextTurn);
       }
 
       this.gameUpdate();
@@ -203,111 +202,188 @@ class Game {
     return null;
   }
 
-  startPreTurn(turn, endCallback) {
-    let counter = this.preturnTime;
+  startPreTurn(turn) {
+    return new Promise((resolve) => {
+      let counter = this.preturnTime;
 
-    this.setState({
-      type: gameStates.PRE_TURN,
-      round: this.getCurrentRound().toClientResource(),
-      turn: turn.toClientResource(),
-      countDown: counter,
+      this.setState({
+        type: gameStates.PRE_TURN,
+        round: this.getCurrentRound().toClientResource(),
+        turn: turn.toClientResource(),
+        countDown: counter,
+      });
+
+      this.gameUpdate();
+
+      this.counterInterval = setInterval(() => {
+        counter--;
+        this.emit(events.UPDATE_COUNTDOWN, counter);
+        this.state.countDown = counter;
+
+        if (counter <= this.ticTime) {
+          this.emit(events.PLAY_SFX, "tic");
+        }
+
+        if (counter <= 0) {
+          this.emit(events.PLAY_SFX, "start");
+          clearInterval(this.counterInterval);
+          resolve(turn);
+        }
+      }, 1000);
     });
-
-    this.gameUpdate();
-
-    this.counterInterval = setInterval(() => {
-      counter--;
-      this.emit(events.UPDATE_PRETURN_COUNTDOWN, counter);
-
-      if (counter <= 0) {
-        clearInterval(this.counterInterval);
-        endCallback();
-      }
-    }, 1000);
   }
 
-  startLearningSong(turn, endCallback) {
-    let counter = this.learnTime;
+  startLearningSong(turn) {
+    this.log(`${turn.player.nickname}'s turn started`);
 
-    this.state = {
-      type: gameStates.LEARNING_SONG,
-      round: this.getCurrentRound().toClientResource(),
-      turn: turn.toPrivateResource(),
-      countDown: counter,
-    };
+    return new Promise((resolve, reject) => {
+      let counter = this.learnTime;
 
-    this.gameUpdate();
+      this.state = {
+        type: gameStates.LEARNING_SONG,
+        round: this.getCurrentRound().toClientResource(),
+        turn: turn.toPrivateResource(),
+        countDown: counter,
+      };
 
-    const song = songPicker.getRandomSongExcluding(this.playedSongs);
+      this.gameUpdate();
 
-    turn.setSong(song);
+      const song = songPicker.getRandomSongExcluding(this.playedSongs);
 
-    this.playedSongs.push(song.id);
+      turn.setSong(song);
 
-    this.emitToPlayer(
-      turn.player,
-      events.PRIVATE_TURN_INFO,
-      turn.toPrivateResource()
-    );
+      this.playedSongs.push(song.id);
 
-    this.counterInterval = setInterval(() => {
-      counter--;
-      this.emit(events.UPDATE_LEARNING_COUNTDOWN, counter);
+      this.emitToPlayer(
+        turn.player,
+        events.PRIVATE_TURN_INFO,
+        turn.toPrivateResource()
+      );
 
-      if (counter <= 0) {
-        clearInterval(this.counterInterval);
+      const playerSocket = turn.player.getSocket();
 
-        this.emitToPlayer(turn.player, events.PRIVATE_TURN_INFO, null);
+      playerSocket.on(events.STOP_LEARNING, () => {
+        playerSocket.offAny(events.STOP_LEARNING);
+        counter = 6;
+      });
 
-        endCallback();
-      }
-    }, 1000);
+      this.counterInterval = setInterval(() => {
+        counter--;
+        this.emit(events.UPDATE_COUNTDOWN, counter);
+        this.state.countDown = counter;
+        if (counter <= this.ticTime) {
+          this.emit(events.PLAY_SFX, "tic");
+        }
+        if (counter <= 0) {
+          clearInterval(this.counterInterval);
+
+          this.emitToPlayer(turn.player, events.PRIVATE_TURN_INFO, null);
+          this.emit(events.PLAY_SFX, "start");
+          resolve(turn);
+        }
+      }, 1000);
+    });
   }
 
-  startPlaySong(turn, endCallback) {
-    let counter = this.playTime;
+  startPlaySong(turn) {
+    this.log(`Time to guess the song ! Type your guesses here`);
+    return new Promise((resolve, reject) => {
+      let counter = this.playTime;
 
-    this.state = {
-      type: gameStates.PLAY_SONG,
-      round: this.getCurrentRound().toClientResource(),
-      turn: turn.toPrivateResource(),
-      countDown: counter,
-    };
+      this.state = {
+        type: gameStates.PLAY_SONG,
+        round: this.getCurrentRound().toClientResource(),
+        turn: turn.toPrivateResource(),
+        countDown: counter,
+      };
 
-    this.gameUpdate();
+      this.gameUpdate();
 
-    this.counterInterval = setInterval(() => {
-      counter--;
-      this.emit(events.UPDATE_PLAY_COUNTDOWN, counter);
-
-      if (counter <= 0) {
-        clearInterval(this.counterInterval);
-        endCallback();
-      }
-    }, 1000);
+      this.counterInterval = setInterval(() => {
+        counter--;
+        this.emit(events.UPDATE_COUNTDOWN, counter);
+        this.state.countDown = counter;
+        if (counter <= this.ticTime) {
+          this.emit(events.PLAY_SFX, "tic");
+        }
+        if (counter <= 0) {
+          clearInterval(this.counterInterval);
+          this.emit(events.PLAY_SFX, "start");
+          resolve(turn);
+        }
+      }, 1000);
+    });
   }
 
   startTurn(turn) {
-    this.startPreTurn(turn, () => {
-      this.log(`${turn.player.nickname}'s turn started`);
-      this.startLearningSong(turn, () => {
-        this.log(`Time to guess the song ! Type your guesses here`);
-        this.startPlaySong(turn, () => {
-          turn.finished = true;
+    this.startScoreScreen
+      .bind(this)(turn)
+      .then(this.startPreTurn.bind(this))
+      .then(this.startLearningSong.bind(this))
+      .then(this.startPlaySong.bind(this))
+      .then(this.startResponseScreen.bind(this))
+      .then(this.finishTurn.bind(this));
+  }
 
-          const nextTurn = this.getCurrentTurn();
+  finishTurn(turn) {
+    return new Promise((resolve, reject) => {
+      turn.finish();
 
-          if (nextTurn) {
-            this.startTurn(nextTurn);
-          } else {
-            this.setState({
-              type: gameStates.SCORE_SCREEN,
-            });
+      const nextTurn = this.getCurrentTurn();
 
-            this.log(`Game is finished !`);
-          }
+      if (nextTurn) {
+        this.startTurn(nextTurn);
+      } else {
+        this.setState({
+          type: gameStates.FINAL_SCREEN,
         });
+
+        this.log(`Game is finished !`);
+      }
+
+      resolve(turn);
+    });
+  }
+
+  startScoreScreen(turn) {
+    return new Promise((resolve, reject) => {
+      this.setState({
+        type: gameStates.SCORES_SCREEN,
+        turn: turn.toClientResource(),
+        round: this.getCurrentRound().toClientResource(),
       });
+
+      const playerSocket = turn.player.socket;
+
+      playerSocket.on(events.START_TURN, () => {
+        playerSocket.offAny(events.START_TURN);
+        resolve(turn);
+      });
+
+      this.gameUpdate();
+    });
+  }
+
+  startResponseScreen(turn) {
+    return new Promise((resolve, reject) => {
+      this.setState({
+        type: gameStates.RESPONSE_SCREEN,
+        turn: turn.toPrivateResource(),
+        round: this.getCurrentRound().toClientResource(),
+      });
+
+      let counter = this.responseTime;
+
+      this.gameUpdate();
+
+      this.counterInterval = setInterval(() => {
+        counter--;
+
+        if (counter <= 0) {
+          clearInterval(this.counterInterval);
+          resolve(turn);
+        }
+      }, 1000);
     });
   }
 
@@ -394,6 +470,26 @@ class Game {
     }
   }
 
+  checkFullGuessed() {
+    const turn = this.getCurrentTurn();
+
+    if (turn) {
+      const results = this.players
+        .filter((p) => p.id !== turn.player.id)
+        .map((p) => {
+          return turn.songWins[p.id] && turn.artistWins[p.id];
+        });
+
+      console.log(results);
+
+      if (results.every((v) => v === true)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   chatMessage(player, message) {
     const chatMessage = new ChatMessage(player, message);
 
@@ -461,6 +557,14 @@ class Game {
       }
 
       if (guessed) {
+        if (this.checkFullGuessed()) {
+          clearInterval(this.counterInterval);
+          const currenTurn = this.getCurrentTurn();
+          this.startResponseScreen
+            .bind(this)(currenTurn)
+            .then(this.finishTurn.bind(this));
+        }
+
         this.gameUpdate();
       } else {
         this.emit(events.CHAT_MESSAGE, chatMessage.toClientResource());

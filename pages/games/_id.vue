@@ -40,9 +40,16 @@
                 v-else-if="gameState.type == gameStates.PLAY_SONG"
               ></PlaySong>
 
-              <ScoreScreen
-                v-else-if="gameState.type == gameStates.SCORE_SCREEN"
-              ></ScoreScreen>
+              <ScoresScreen
+                v-else-if="gameState.type == gameStates.SCORES_SCREEN"
+              ></ScoresScreen>
+              <FinalScreen
+                v-else-if="gameState.type == gameStates.FINAL_SCREEN"
+              ></FinalScreen>
+
+              <ResponseScreen
+                v-else-if="gameState.type == gameStates.RESPONSE_SCREEN"
+              ></ResponseScreen>
             </zoom-center-transition>
           </div>
         </div>
@@ -161,6 +168,12 @@ export default {
 
     this.socket.on(events.PRIVATE_TURN_INFO, (turnInfo) => {
       this.turnInfo = turnInfo;
+    });
+
+    this.socket.on(events.UPDATE_COUNTDOWN, (countDown) => {
+      if (this.game && this.game.state && this.game.state.countDown) {
+        this.game.state.countDown = countDown;
+      }
     });
   },
 
