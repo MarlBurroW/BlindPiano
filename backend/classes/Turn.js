@@ -7,6 +7,7 @@ class Turn {
     this.finished = false;
     this.artistWins = {};
     this.songWins = {};
+    this.proposedSongs = {};
   }
 
   finish() {
@@ -23,6 +24,10 @@ class Turn {
 
   getSong(song) {
     return this.song;
+  }
+
+  setProposedSongs(songs) {
+    this.proposedSongs = songs;
   }
 
   getSongName() {
@@ -42,6 +47,7 @@ class Turn {
     return {
       playerId: this.player.id,
       song: this.song,
+      proposedSongs: this.proposedSongs,
       songWins: this.songWins,
       artistWins: this.artistWins,
     };

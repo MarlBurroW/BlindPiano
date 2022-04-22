@@ -15,14 +15,16 @@
     "express-validator": "^6.14.0",
     "interactjs": "^1.10.11",
     "lodash": "^4.17.21",
+    "mysql2": "^2.3.3",
     "nodemon": "^2.0.15",
     "notyf": "^3.10.0",
     "nuxt": "^2.15.8",
+    "sequelize": "^6.19.0",
     "serve-index": "^1.9.1",
     "socket.io": "^4.4.1",
     "socket.io-client": "^4.4.1",
     "spotify-web-api-js": "^1.5.2",
-    "spotify-web-api-node": "^5.0.2",
+    "sqlite3": "^5.0.4",
     "string-similarity": "^4.0.4",
     "tonal": "^2.2.2",
     "tone": "^14.8.38",
@@ -33,10 +35,12 @@
     "vue-chat-scroll": "^2.0.0-alpha.4",
     "vue-clipboard2": "^0.3.3",
     "vue-dragscroll": "^3.0.1",
+    "vue-plyr": "^7.0.0",
     "vue2-transitions": "^0.3.0",
     "vuedraggable": "^2.24.3",
     "vuescroll": "^4.17.3",
-    "webmidi": "^3.0.19"
+    "webmidi": "^3.0.19",
+    "youtubei.js": "^1.4.1-dev.2"
   },
   "scripts": {
     "start": "nodemon --watch nuxt.config.js --watch backend ./backend/server.js"

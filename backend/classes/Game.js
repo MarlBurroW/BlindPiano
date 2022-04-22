@@ -6,17 +6,23 @@ const Round = require("../classes/Round");
 const LogMessage = require("./LogMessage");
 const ChatMessage = require("./ChatMessage");
 const stringSimilarity = require("string-similarity");
+const EventEmitter = require("events");
+
+const InternalEvents = {
+  NEW_GUESS: "NEW_GUESS",
+};
+
 class Game {
   constructor(id) {
     this.id = id;
     this.players = [];
     this.state = {
-      type: gameStates.WAITING_PLAYERS,
+      type: gameStates.WAITING_PLAYERS_SCREEN,
     };
 
     this.scores = {};
 
-    this.guessArtistPoints = 50;
+    this.guessArtistPoints = 30;
     this.guessSongPoints = 50;
     this.someoneGuessMyPlayPoints = 60;
 
@@ -25,10 +31,12 @@ class Game {
     this.guessSimilarityThreshold = 0.5;
     this.roundCount = 3;
     this.learnTime = 60;
+    this.chooseTime = 10;
+    this.chooseCount = 2;
     this.playTime = 60;
     this.ticTime = 5;
     this.preturnTime = 5;
-    this.responseTime = 5;
+    this.responseTime = 10;
     this.rounds = [];
     this.currentRound = null;
 
@@ -46,13 +54,14 @@ class Game {
       "#009688",
       "#4CAF50",
       "#CDDC39",
-
       "#FFC107",
       "#FF9800",
       "#FF5722",
       "#795548",
       "#607D8B",
     ];
+
+    this.internalEventEmitter = new EventEmitter();
   }
 
   setIO(io) {
@@ -135,6 +144,16 @@ class Game {
     this.emit(events.GAME_UPDATED, this.toClientResource());
   }
 
+  updateOptions(options) {
+    if (this.state.type === gameStates.WAITING_PLAYERS_SCREEN) {
+      for (const key in options) {
+        this[key] = options[key];
+      }
+    }
+
+    this.gameUpdate();
+  }
+
   removeTurnsByPlayerId(playerId) {
     for (let i = 0; i < this.rounds.length; i++) {
       const round = this.rounds[i];
@@ -207,7 +226,7 @@ class Game {
       let counter = this.preturnTime;
 
       this.setState({
-        type: gameStates.PRE_TURN,
+        type: gameStates.PRE_TURN_SCREEN,
         round: this.getCurrentRound().toClientResource(),
         turn: turn.toClientResource(),
         countDown: counter,
@@ -236,23 +255,17 @@ class Game {
   startLearningSong(turn) {
     this.log(`${turn.player.nickname}'s turn started`);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let counter = this.learnTime;
 
       this.state = {
-        type: gameStates.LEARNING_SONG,
+        type: gameStates.LEARNING_SONG_SCREEN,
         round: this.getCurrentRound().toClientResource(),
-        turn: turn.toPrivateResource(),
+        turn: turn.toClientResource(),
         countDown: counter,
       };
 
       this.gameUpdate();
-
-      const song = songPicker.getRandomSongExcluding(this.playedSongs);
-
-      turn.setSong(song);
-
-      this.playedSongs.push(song.id);
 
       this.emitToPlayer(
         turn.player,
@@ -264,7 +277,9 @@ class Game {
 
       playerSocket.on(events.STOP_LEARNING, () => {
         playerSocket.offAny(events.STOP_LEARNING);
-        counter = 6;
+        counter = 5;
+        this.state.countDown = counter;
+        this.gameUpdate();
       });
 
       this.counterInterval = setInterval(() => {
@@ -291,13 +306,25 @@ class Game {
       let counter = this.playTime;
 
       this.state = {
-        type: gameStates.PLAY_SONG,
+        type: gameStates.PLAY_SONG_SCREEN,
         round: this.getCurrentRound().toClientResource(),
         turn: turn.toPrivateResource(),
         countDown: counter,
       };
 
       this.gameUpdate();
+
+      const endTurn = () => {
+        clearInterval(this.counterInterval);
+        this.emit(events.PLAY_SFX, "start");
+        resolve(turn);
+      };
+
+      this.internalEventEmitter.on(InternalEvents.NEW_GUESS, () => {
+        if (this.checkFullGuessed()) {
+          endTurn();
+        }
+      });
 
       this.counterInterval = setInterval(() => {
         counter--;
@@ -307,25 +334,94 @@ class Game {
           this.emit(events.PLAY_SFX, "tic");
         }
         if (counter <= 0) {
-          clearInterval(this.counterInterval);
-          this.emit(events.PLAY_SFX, "start");
-          resolve(turn);
+          endTurn();
         }
       }, 1000);
+    });
+  }
+
+  startChooseSong(turn) {
+    return new Promise(async (resolve, reject) => {
+      let counter = this.chooseTime;
+
+      let songs = await songPicker.getRandomSongs(
+        this.chooseCount,
+        this.playedSongs
+      );
+
+      if (songs.length < this.chooseCount) {
+        songs = await songPicker.getRandomSongs(this.chooseCount);
+      }
+
+      turn.setProposedSongs(songs);
+
+      this.emitToPlayer(
+        turn.player,
+        events.PRIVATE_TURN_INFO,
+        turn.toPrivateResource()
+      );
+
+      this.setState({
+        type: gameStates.CHOOSE_SONG_SCREEN,
+        round: this.getCurrentRound().toClientResource(),
+        turn: turn.toClientResource(),
+        countDown: counter,
+      });
+
+      const endScreen = () => {
+        if (!turn.song) {
+          const song = _.sample(turn.proposedSongs);
+          turn.setSong(song);
+          this.playedSongs.push(song.id);
+        }
+
+        this.emitToPlayer(turn.player, events.PRIVATE_TURN_INFO, null);
+        clearInterval(this.counterInterval);
+        resolve(turn);
+      };
+
+      const playerSocket = turn.player.getSocket();
+
+      playerSocket.on(events.CHOOSE_SONG, (songId) => {
+        playerSocket.offAny(events.CHOOSE_SONG);
+
+        if (turn.proposedSongs.map((s) => s.id).includes(songId)) {
+          const song = turn.proposedSongs.find((s) => s.id === songId);
+          turn.setSong(song);
+          this.playedSongs.push(song.id);
+        }
+
+        endScreen();
+      });
+
+      this.counterInterval = setInterval(() => {
+        counter--;
+        this.emit(events.UPDATE_COUNTDOWN, counter);
+        this.state.countDown = counter;
+        if (counter <= this.ticTime) {
+          this.emit(events.PLAY_SFX, "tic");
+        }
+        if (counter <= 0) {
+          endScreen();
+        }
+      }, 1000);
+
+      this.gameUpdate();
     });
   }
 
   startTurn(turn) {
     this.startScoreScreen
       .bind(this)(turn)
-      .then(this.startPreTurn.bind(this))
+      // .then(this.startPreTurn.bind(this))
+      .then(this.startChooseSong.bind(this))
       .then(this.startLearningSong.bind(this))
       .then(this.startPlaySong.bind(this))
       .then(this.startResponseScreen.bind(this))
-      .then(this.finishTurn.bind(this));
+      .then(this.startFinishTurn.bind(this));
   }
 
-  finishTurn(turn) {
+  startFinishTurn(turn) {
     return new Promise((resolve, reject) => {
       turn.finish();
 
@@ -412,25 +508,18 @@ class Game {
     }
   }
 
-  toClientResource() {
-    return {
-      id: this.id,
-      state: this.state,
-      leaderId: this.leaderId,
-      players: this.players.map((p) => p.toClientResource()),
-      scores: this.scores,
-      roundCount: this.roundCount,
-    };
-  }
-
   shouldBroadcast(player) {
-    if (this.state && this.state.type == gameStates.WAITING_PLAYERS) {
+    if (
+      this.state &&
+      (this.state.type == gameStates.WAITING_PLAYERS_SCREEN ||
+        this.state.type == gameStates.FINAL_SCREEN)
+    ) {
       return true;
     }
 
     if (
       this.state &&
-      this.state.type == gameStates.PLAY_SONG &&
+      this.state.type == gameStates.PLAY_SONG_SCREEN &&
       player.id === this.state.turn.playerId
     ) {
       return true;
@@ -493,7 +582,7 @@ class Game {
   chatMessage(player, message) {
     const chatMessage = new ChatMessage(player, message);
 
-    if (this.state.type === gameStates.PLAY_SONG) {
+    if (this.state.type === gameStates.PLAY_SONG_SCREEN) {
       const turn = this.getCurrentTurn();
 
       if (turn.player.id === player.id) {
@@ -505,21 +594,21 @@ class Game {
         return;
       }
 
-      const artistName = turn.getArtistName();
-      const songName = turn.getSongName();
+      const artist = turn.song.artist;
+      const title = turn.song.title;
 
       const artistMatch = stringSimilarity.compareTwoStrings(
         message.toLowerCase(),
-        artistName.toLowerCase()
+        artist.toLowerCase()
       );
       const songMatch = stringSimilarity.compareTwoStrings(
         message.toLowerCase(),
-        songName.toLowerCase()
+        title.toLowerCase()
       );
 
       let guessed = false;
 
-      if (songMatch >= this.guessSimilarityThreshold) {
+      if (artistMatch >= this.guessSimilarityThreshold) {
         if (!turn.artistWins[player.id]) {
           turn.artistWins[player.id] = true;
 
@@ -538,7 +627,7 @@ class Game {
         }
       }
 
-      if (artistMatch >= this.guessSimilarityThreshold) {
+      if (songMatch >= this.guessSimilarityThreshold) {
         if (!turn.songWins[player.id]) {
           turn.songWins[player.id] = true;
           this.log(
@@ -557,13 +646,7 @@ class Game {
       }
 
       if (guessed) {
-        if (this.checkFullGuessed()) {
-          clearInterval(this.counterInterval);
-          const currenTurn = this.getCurrentTurn();
-          this.startResponseScreen
-            .bind(this)(currenTurn)
-            .then(this.finishTurn.bind(this));
-        }
+        this.internalEventEmitter.emit(InternalEvents.NEW_GUESS);
 
         this.gameUpdate();
       } else {
@@ -572,6 +655,27 @@ class Game {
     } else {
       this.emit(events.CHAT_MESSAGE, chatMessage.toClientResource());
     }
+  }
+
+  toClientResource() {
+    return {
+      id: this.id,
+      state: this.state,
+      leaderId: this.leaderId,
+      players: this.players.map((p) => p.toClientResource()),
+      scores: this.scores,
+      roundCount: this.roundCount,
+      options: {
+        roundCount: this.roundCount,
+        learnTime: this.learnTime,
+        playTime: this.playTime,
+        guessArtistPoints: this.guessArtistPoints,
+        guessSongPoints: this.guessSongPoints,
+        someoneGuessMyPlayPoints: this.someoneGuessMyPlayPoints,
+        chooseTime: this.chooseTime,
+        chooseCount: this.chooseCount,
+      },
+    };
   }
 }
 

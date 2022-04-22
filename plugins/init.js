@@ -10,12 +10,18 @@ import vuescroll from "vuescroll";
 import drag from "v-drag";
 import Transitions from "vue2-transitions";
 
+import VuePlyr from "vue-plyr";
+import "vue-plyr/dist/vue-plyr.css";
+
 export default async (app, inject) => {
   Vue.component(Avataaars);
   Vue.use(VueChatScroll);
   Vue.use(Transitions);
   Vue.use(drag);
   Vue.use(vuescroll);
+  Vue.use(VuePlyr, {
+    plyr: {},
+  });
   const notyf = new Notyf({
     duration: 5000,
     ripple: true,
@@ -53,6 +59,10 @@ export default async (app, inject) => {
 
   inject("gameLink", (game) => {
     return game ? urljoin(config.app_url, "games", game.id) : null;
+  });
+
+  inject("formatSeconds", (s) => {
+    return (s - (s %= 60)) / 60 + (9 < s ? ":" : ":0") + s;
   });
   VueClipboard.config.autoSetContainer = true;
   Vue.use(VueClipboard);

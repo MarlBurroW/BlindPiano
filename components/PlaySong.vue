@@ -18,7 +18,7 @@
       </div>
 
       <div class="countdown">
-        {{ this.game.state.countDown }}
+        {{ $formatSeconds(this.game.state.countDown) }}
       </div>
     </div>
 

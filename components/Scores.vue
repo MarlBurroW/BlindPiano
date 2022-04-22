@@ -23,7 +23,7 @@
           </td>
 
           <td class="score">
-            <span>{{ player.score }}</span>
+            <span>{{ getPlayerScore(player.id) }}</span>
           </td>
         </tr>
       </tbody>
@@ -32,7 +32,11 @@
 </template>
 
 <script>
+import contextMixin from "../mixins/context-mixin";
+import events from "../events";
+
 export default {
+  mixins: [contextMixin],
   props: {
     players: {
       type: Array,

@@ -13,6 +13,7 @@ const promote = require("./socket-events/promote");
 const updateDeviceName = require("./socket-events/update-device-name");
 const keyPressed = require("./socket-events/key-pressed");
 const keyReleased = require("./socket-events/key-released");
+const updateOptions = require("./socket-events/update-options");
 
 const events = require("../../events");
 
@@ -38,6 +39,7 @@ module.exports = {
       socket.on(events.UPDATE_DEVICE_NAME, updateDeviceName(gameContext));
       socket.on(events.KEY_PRESSED, keyPressed(gameContext));
       socket.on(events.KEY_RELEASED, keyReleased(gameContext));
+      socket.on(events.UPDATE_GAME_OPTIONS, updateOptions(gameContext));
     });
   },
 };

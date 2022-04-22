@@ -34,7 +34,7 @@
               {{ player.deviceName ? player.deviceName : "Mouse & Keyboard" }}
             </div>
 
-            <div v-id="getPlayerScore(player.id)" class="mt-3">
+            <div v-if="getPlayerScore(player.id)" class="mt-3">
               <strong
                 style="font-size: 25px"
                 :style="{ color: player.color }"

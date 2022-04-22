@@ -18,7 +18,7 @@
         </v-toolbar-title>
 
         <v-toolbar-title v-if="countDown">
-          &nbsp;|&nbsp;<strong>{{ countDown }}</strong> second(s) left
+          &nbsp;|&nbsp;<strong>{{ $formatSeconds(countDown) }}</strong>
         </v-toolbar-title>
       </v-toolbar>
       <vue-scroll :ops="scrollOptions">
@@ -26,18 +26,22 @@
           <div class="flex-grow-1" v-if="game">
             <zoom-center-transition mode="out-in">
               <WaitPlayers
-                v-if="gameState.type == gameStates.WAITING_PLAYERS"
+                v-if="gameState.type == gameStates.WAITING_PLAYERS_SCREEN"
               ></WaitPlayers>
 
               <PreTurn
-                v-else-if="gameState.type == gameStates.PRE_TURN"
+                v-else-if="gameState.type == gameStates.PRE_TURN_SCREEN"
               ></PreTurn>
+
+              <ChooseSongScreen
+                v-else-if="gameState.type == gameStates.CHOOSE_SONG_SCREEN"
+              ></ChooseSongScreen>
               <LearnSong
-                v-else-if="gameState.type == gameStates.LEARNING_SONG"
+                v-else-if="gameState.type == gameStates.LEARNING_SONG_SCREEN"
               ></LearnSong>
 
               <PlaySong
-                v-else-if="gameState.type == gameStates.PLAY_SONG"
+                v-else-if="gameState.type == gameStates.PLAY_SONG_SCREEN"
               ></PlaySong>
 
               <ScoresScreen
