@@ -1,3 +1,5 @@
+import Vue from "vue";
+
 export const state = () => ({
   claimToken: null,
   gameId: null,
@@ -10,6 +12,9 @@ export const state = () => ({
   midiDevice: null,
   leftDrawer: true,
   rightDrawer: true,
+  instrument: "piano",
+  preset: null,
+  localPlayersSettings: {},
 });
 
 export const mutations = {
@@ -29,6 +34,20 @@ export const mutations = {
   },
   storeGame(state, game) {
     state.game = game;
+
+    if (game) {
+      for (let i = 0; i < game.players.length; i++) {
+        const player = game.players[i];
+
+        if (!state.localPlayersSettings[player.id]) {
+          Vue.set(state.localPlayersSettings, player.id, {
+            visibility: true,
+            mute: false,
+            volume: 0,
+          });
+        }
+      }
+    }
   },
   storeGameId(state, gameId) {
     state.gameId = gameId;
@@ -51,6 +70,16 @@ export const mutations = {
     }
 
     state.midiDevice = device;
+  },
+  storeInstrument(state, instrument) {
+    state.instrument = instrument;
+  },
+  storePreset(state, preset) {
+    state.preset = preset;
+  },
+
+  storeLocalPlayerSetting(state, { playerId, prop, value }) {
+    state.localPlayersSettings[playerId][prop] = value;
   },
 };
 export const strict = false;

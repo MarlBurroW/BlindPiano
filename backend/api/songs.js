@@ -3,8 +3,8 @@ const { body, checkSchema, validationResult } = require("express-validator");
 const app = require("../modules/app");
 const express = require("express");
 const router = express.Router();
-
-const Innertube = require("youtubei.js");
+const youtube = require("../modules/youtube");
+const audiodb = require("../modules/audiodb");
 
 const Song = require("../database/models/Song");
 
@@ -14,6 +14,39 @@ function youtube_parser(url) {
   var match = url.match(regExp);
   return match && match[7].length == 11 ? match[7] : false;
 }
+
+router.get("/songs/search_audiodb_artist", async (req, res, next) => {
+  const client = audiodb.getClient();
+
+  client
+    .searchArtist(req.query.search)
+    .then((results) => {
+      res.send(results);
+    })
+    .catch(next);
+});
+
+router.get("/songs/search_audiodb_song", async (req, res, next) => {
+  const client = audiodb.getClient();
+
+  client
+    .searchSong(req.query.artistSearch, req.query.songSearch)
+    .then((results) => {
+      res.send(results);
+    })
+    .catch(next);
+});
+
+router.get("/songs/search_youtube", async (req, res, next) => {
+  const client = await youtube.getClient();
+  console.log(req.query.search);
+  client
+    .search(req.query.search)
+    .then((results) => {
+      res.send(results);
+    })
+    .catch(next);
+});
 
 router.get("/songs", (req, res) => {
   Song.findAll().then((songs) => {
@@ -31,29 +64,24 @@ router.delete("/songs/:songId", (req, res, next) => {
   });
 });
 
-router.post(
-  "/songs/info",
-  body("youtube_url").isURL().withMessage("must be an URL").trim(),
-  async (req, res) => {
-    const errors = validationResult(req);
+router.post("/songs/info", body("youtube_id").trim(), async (req, res) => {
+  const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.mapped() });
-    }
-
-    const video_id = youtube_parser(req.body.youtube_url);
-
-    try {
-      const youtube = await new Innertube({ gl: "FR" }); // all parameters are optional.
-      const song = await youtube.getDetails(video_id);
-      res.send(song);
-    } catch (err) {
-      res
-        .status(400)
-        .json({ message: `Error while scrapping Youtube: ${err.message}` });
-    }
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.mapped() });
   }
-);
+
+  const client = await youtube.getClient();
+
+  try {
+    const song = await client.getDetails(req.body.youtube_id);
+    res.send(song);
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: `Error while scrapping Youtube: ${err.message}` });
+  }
+});
 
 router.post(
   "/songs",

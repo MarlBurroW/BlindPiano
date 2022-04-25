@@ -528,16 +528,23 @@ class Game {
     return false;
   }
 
-  pressKey(key, player) {
+  holdPedal(payload, player) {
     if (this.shouldBroadcast(player)) {
-      key.color = player && player.color ? player.color : null;
-      player.socket.broadcast.to(this.id).emit(events.KEY_PRESSED, key);
+      payload.color = player && player.color ? player.color : null;
+      player.socket.broadcast.to(this.id).emit(events.HOLD_PEDAL, payload);
     }
   }
 
-  unpressKey(key, player) {
+  pressKey(payload, player) {
     if (this.shouldBroadcast(player)) {
-      player.socket.broadcast.to(this.id).emit(events.KEY_RELEASED, key);
+      payload.color = player && player.color ? player.color : null;
+      player.socket.broadcast.to(this.id).emit(events.KEY_PRESSED, payload);
+    }
+  }
+
+  unpressKey(payload, player) {
+    if (this.shouldBroadcast(player)) {
+      player.socket.broadcast.to(this.id).emit(events.KEY_RELEASED, payload);
     }
   }
 

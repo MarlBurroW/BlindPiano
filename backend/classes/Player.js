@@ -7,6 +7,8 @@ class Player {
     this.color = null;
     this.avatar = avatar;
     this.deviceName = null;
+    this.instrument = "piano";
+    this.preset = null;
   }
 
   setDeviceName(name) {
@@ -59,6 +61,22 @@ class Player {
     return !this.isOnline();
   }
 
+  setInstrument(instrument) {
+    this.instrument = instrument;
+  }
+
+  getInstrument() {
+    return this.instrument;
+  }
+
+  setPreset(preset) {
+    this.preset = preset;
+  }
+
+  getPreset() {
+    return this.preset;
+  }
+
   toClientResource() {
     return {
       id: this.id,
@@ -67,6 +85,8 @@ class Player {
       avatar: this.avatar,
       color: this.color,
       deviceName: this.deviceName,
+      instrument: this.instrument,
+      preset: this.preset,
     };
   }
 }

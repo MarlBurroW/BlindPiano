@@ -122,7 +122,6 @@ export default {
   position: relative;
   display: flex;
   justify-content: center;
-  padding: 20px 0px;
 }
 
 .slided-piano {

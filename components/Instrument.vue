@@ -4,14 +4,15 @@
 
 <script>
 import contextMixin from "../mixins/context-mixin";
-import { Piano } from "@tonejs/piano";
+import Piano from "../instruments/Piano";
+import PolySynth from "../instruments/Polysynth";
+import MembraneSynth from "../instruments/MembraneSynth";
+
 import * as Tone from "tone";
 
 import events from "../events";
 
 export default {
-  mixins: [contextMixin],
-
   props: {
     eventBus: {
       type: Object,
@@ -21,41 +22,49 @@ export default {
       type: Number,
       default: 0,
     },
+    instrument: {
+      type: String,
+      required: true,
+    },
+    preset: {
+      type: String,
+    },
+    player: {
+      type: Object,
+      required: true,
+    },
   },
 
   mounted() {
-    const piano = new Piano({
-      velocities: 5,
-      volume: {
-        pedal: -20,
-        strings: -20,
-        keybed: -20,
-        harmonics: -20,
-      },
+    this.eventBus.on("key-pressed", (payload) => {
+      if (
+        this.currentInstrument &&
+        this.currentInstrument.keyDown &&
+        payload.from === this.player.id
+      ) {
+        this.currentInstrument.keyDown(payload.key);
+      }
     });
 
-    piano.load().then(() => {
-      console.log("loaded!");
+    this.eventBus.on("key-released", (payload) => {
+      if (
+        this.currentInstrument &&
+        this.currentInstrument.keyUp &&
+        payload.from === this.player.id
+      ) {
+        this.currentInstrument.keyUp(payload.key);
+      }
     });
 
-    piano.connect(this.volumeNode);
-
-    this.eventBus.on("key-pressed", (key) => {
-      piano.keyDown({ note: key.name, velocity: key.velocity });
+    this.eventBus.on("hold-pedal", (payload) => {
+      if (
+        this.currentInstrument &&
+        this.currentInstrument.holdPedal &&
+        payload.from === this.player.id
+      ) {
+        this.currentInstrument.holdPedal(payload.hold);
+      }
     });
-    this.eventBus.on("key-released", (key) => {
-      piano.keyUp({ note: key.name });
-    });
-
-    this.socket.on(events.KEY_PRESSED, (key) => {
-      piano.keyDown({ note: key.name, velocity: key.velocity });
-    });
-
-    this.socket.on(events.KEY_RELEASED, (key) => {
-      piano.keyUp({ note: key.name });
-    });
-
-    this.piano = piano;
   },
   watch: {
     volume: {
@@ -64,8 +73,20 @@ export default {
         this.volumeDb = db;
       },
     },
+    preset: {
+      immediate: true,
+      handler(presetId) {
+        if (this.currentInstrument.setPresetById) {
+          this.currentInstrument.setPresetById(presetId);
+        }
+      },
+    },
   },
   computed: {
+    currentInstrument() {
+      return this.instruments[this.instrument];
+    },
+
     volumeDb: {
       get() {
         return this.volumeNode.volume.value;
@@ -75,10 +96,28 @@ export default {
       },
     },
   },
+  methods: {},
+
   data() {
+    const volumeNode = new Tone.Volume(0).toDestination();
+
+    const piano = new Piano();
+    piano.setVolumeNode(volumeNode);
+
+    const polysynth = new PolySynth();
+    polysynth.setVolumeNode(volumeNode);
+
+    const membranesynth = new MembraneSynth();
+    membranesynth.setVolumeNode(volumeNode);
+
     return {
-      volumeNode: new Tone.Volume(0).toDestination(),
+      volumeNode: volumeNode,
       piano: null,
+      instruments: {
+        piano,
+        polysynth,
+        membranesynth,
+      },
     };
   },
 };

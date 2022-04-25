@@ -19,7 +19,7 @@ export default {
   props: {
     autoplay: {
       type: Boolean,
-      required: true,
+      required: false,
     },
     song: {
       type: Object,

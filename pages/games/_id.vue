@@ -61,7 +61,15 @@
     </v-main>
     <right-sidebar></right-sidebar>
     <v-footer app padless v-if="game && socket">
-      <Instrument :volume="volume" :event-bus="keyboardEventBus"></Instrument>
+      <Instrument
+        v-for="player in players"
+        :key="player.key"
+        :volume="getLocalPlayerSetting(player.id, 'volume')"
+        :instrument="player.instrument"
+        :preset="player.preset"
+        :player="player"
+        :event-bus="keyboardEventBus"
+      ></Instrument>
 
       <Keyboard :volume.sync="volume" :event-bus="keyboardEventBus"></Keyboard>
     </v-footer>
@@ -154,14 +162,6 @@ export default {
       this.$playSFX("player-disconnect");
     });
 
-    this.keyboardEventBus.on("key-pressed", (key) => {
-      this.socket.emit(events.KEY_PRESSED, key);
-    });
-
-    this.keyboardEventBus.on("key-released", (key) => {
-      this.socket.emit(events.KEY_RELEASED, key);
-    });
-
     this.socket.on(events.UPDATE_TIMER, (timer) => {
       this.turnTimer = timer;
     });
@@ -179,6 +179,30 @@ export default {
         this.game.state.countDown = countDown;
       }
     });
+
+    this.socket.on(events.KEY_PRESSED, (payload) => {
+      this.keyboardEventBus.emit("key-pressed", payload);
+    });
+
+    this.socket.on(events.KEY_RELEASED, (payload) => {
+      this.keyboardEventBus.emit("key-released", payload);
+    });
+
+    this.socket.on(events.HOLD_PEDAL, (payload) => {
+      this.keyboardEventBus.emit("hold-pedal", payload);
+    });
+
+    this.keyboardEventBus.on("key-pressed", (payload) => {
+      if (payload.from == this.me.id) {
+        this.socket.emit(events.KEY_PRESSED, payload);
+      }
+    });
+
+    this.keyboardEventBus.on("key-released", (payload) => {
+      if (payload.from == this.me.id) {
+        this.socket.emit(events.KEY_RELEASED, payload);
+      }
+    });
   },
 
   watch: {
@@ -187,6 +211,13 @@ export default {
         events.UPDATE_DEVICE_NAME,
         midiDevice ? midiDevice.name : null
       );
+    },
+
+    instrument(instrument) {
+      this.socket.emit(events.SET_INSTRUMENT, instrument);
+    },
+    preset(preset) {
+      this.socket.emit(events.SET_PRESET, preset);
     },
     gameState(state, oldState) {},
   },

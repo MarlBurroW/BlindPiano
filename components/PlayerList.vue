@@ -27,13 +27,6 @@
               >{{ player.nickname }}
             </p>
 
-            <div>
-              <v-icon color="subtitle" size="15">{{
-                player.deviceName ? "mdi-piano" : "mdi-keyboard-outline"
-              }}</v-icon>
-              {{ player.deviceName ? player.deviceName : "Mouse & Keyboard" }}
-            </div>
-
             <div v-if="getPlayerScore(player.id)" class="mt-3">
               <strong
                 style="font-size: 25px"
@@ -81,12 +74,7 @@ import events from "../events";
 
 export default {
   mixins: [contextMixin],
-  props: {
-    players: {
-      type: Array,
-      required: false,
-    },
-  },
+  props: {},
   methods: {
     kick(player) {
       this.socket.emit(events.KICK_PLAYER, player.id);

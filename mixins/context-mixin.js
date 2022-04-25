@@ -62,6 +62,23 @@ export default {
         return this.$store.state.midiDevice;
       },
     },
+    instrument: {
+      set(instrument) {
+        this.$store.commit("storeInstrument", instrument);
+      },
+      get() {
+        return this.$store.state.instrument;
+      },
+    },
+    preset: {
+      set(preset) {
+        this.$store.commit("storePreset", preset);
+      },
+      get() {
+        return this.$store.state.preset;
+      },
+    },
+
     gameState() {
       return this.game ? this.game.state : null;
     },
@@ -108,6 +125,10 @@ export default {
         : null;
     },
 
+    localPlayersSettings() {
+      return this.$store.state.localPlayersSettings;
+    },
+
     leftDrawer: {
       set(drawer) {
         this.$store.commit("storeLeftDrawer", drawer);
@@ -123,6 +144,14 @@ export default {
       get() {
         return this.$store.state.rightDrawer;
       },
+    },
+
+    players() {
+      if (this.game) {
+        return this.game.players;
+      } else {
+        return [];
+      }
     },
 
     scoreOrderedPlayers() {
@@ -141,6 +170,17 @@ export default {
     },
   },
   methods: {
+    getLocalPlayerSetting(playerId, prop) {
+      return this.$store.state.localPlayersSettings[playerId][prop];
+    },
+    setLocalPlayerSetting(playerId, prop, value) {
+      this.$store.commit("storeLocalPlayerSetting", {
+        playerId,
+        prop,
+        value,
+      });
+    },
+
     getPlayerArtistGuessState(playerId) {
       return this.turn.artistWins[playerId];
     },

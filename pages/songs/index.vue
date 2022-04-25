@@ -6,43 +6,15 @@
     </v-toolbar>
     <v-card>
       <v-card-text class="d-flex">
-        <v-text-field
-          outlined
-          v-model="youtubeUrl"
-          label="Youtube Video URL"
-          :error-messages="
-            errors && errors.youtube_url
-              ? `${errors.youtube_url.param} ${errors.youtube_url.msg}`
-              : null
-          "
-        ></v-text-field>
-
-        <v-btn
-          @click="sendYoutubeUrl"
-          :loading="loading"
-          :disabled="loading"
-          x-large
-          color="primary"
-          >Fetch Video Info</v-btn
-        >
+        <SearchSongYoutube
+          v-model="selectedSong"
+          @input="fetchYoutubeInfo"
+        ></SearchSongYoutube>
       </v-card-text>
-
-      <v-toolbar>
-        <v-toolbar-title>Songs</v-toolbar-title>
-        <v-spacer></v-spacer>
-
-        <v-btn @click="fetchSongs" icon><v-icon>mdi-refresh</v-icon></v-btn>
-      </v-toolbar>
+      <!-- <v-card-text class="d-flex">
+        <SearchTheAudioDB></SearchTheAudioDB>
+      </v-card-text> -->
       <v-card-text v-if="song">
-        <v-text-field
-          outlined
-          v-model="song.id"
-          disabled
-          label="Youtube ID"
-          :error-messages="
-            errors && errors.id ? `${errors.id.param} ${errors.id.msg}` : null
-          "
-        ></v-text-field>
         <v-text-field
           outlined
           v-model="song.title"
@@ -59,30 +31,6 @@
           "
         ></v-text-field>
 
-        <v-text-field
-          outlined
-          disabled
-          v-model="song.thumbnail_url"
-          label="Thumbnail URL"
-          :error-messages="
-            errors && errors.thumbnail_url
-              ? `${errors.thumbnail_url.param} ${errors.thumbnail_url.msg}`
-              : null
-          "
-        ></v-text-field>
-
-        <v-text-field
-          outlined
-          disabled
-          v-model="song.length_seconds"
-          label="Duration (seconds)"
-          :error-messages="
-            errors && errors.length_seconds
-              ? `${errors.length_seconds.param} ${errors.length_seconds.msg}`
-              : null
-          "
-        ></v-text-field>
-
         <v-btn
           @click="addSong"
           :loading="loading"
@@ -92,13 +40,20 @@
           >Add Song</v-btn
         >
       </v-card-text>
+
+      <v-toolbar>
+        <v-toolbar-title>Songs</v-toolbar-title>
+        <v-spacer></v-spacer>
+
+        <v-btn @click="fetchSongs" icon><v-icon>mdi-refresh</v-icon></v-btn>
+      </v-toolbar>
     </v-card>
 
     <v-card>
       <v-data-table
         :headers="headers"
         :items="songs"
-        :items-per-page="5"
+        :items-per-page="50"
         class="elevation-1"
       >
         <template v-slot:item.thumbnail_url="{ item }">
@@ -169,6 +124,7 @@ export default {
 
           this.song = null;
           this.songInfo = null;
+          this.selectedSong = null;
         })
         .catch((err) => {
           console.error(err);
@@ -194,27 +150,32 @@ export default {
         });
     },
 
-    sendYoutubeUrl() {
+    fetchYoutubeInfo(song) {
+      if (!song) {
+        this.songInfo = null;
+        this.song = null;
+        return;
+      }
+
       this.loading = true;
       this.error = null;
       this.errors = null;
       this.songInfo = null;
       this.$axios
         .post("/api/songs/info", {
-          youtube_url: this.youtubeUrl,
+          youtube_id: song.id,
         })
         .then((res) => {
-          this.youtubeUrl = "";
           this.songInfo = res.data;
 
           const parseResult = this.songInfo.title
-            .split("–")
+            .split("-")
             .map((p) => p.trim());
 
           this.song = {
             id: this.songInfo.id,
-            title: parseResult ? parseResult[0] : "",
-            artist: parseResult ? parseResult[1] : "",
+            title: parseResult ? parseResult[1] : "",
+            artist: parseResult ? parseResult[0] : "",
             thumbnail_url: this.songInfo.thumbnail.url,
             length_seconds: this.songInfo.metadata.length_seconds,
             likes_count: this.songInfo.metadata.likes.count,
@@ -246,11 +207,11 @@ export default {
   },
   data() {
     return {
-      youtubeUrl: "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
       loading: false,
       errors: null,
       error: null,
       songInfo: null,
+      selectedSong: null,
       songs: [],
       song: null,
       headers: [

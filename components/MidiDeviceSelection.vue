@@ -1,19 +1,18 @@
 <template>
-  <div class="pa-5">
-    <v-select
-      placeholder="Select your midi device"
-      label="Midi Device"
-      outlined
-      :items="deviceItems"
-      :value="midiDevice ? midiDevice.id : null"
-      return-object
-      @input="
-        ($event) => {
-          $store.commit('storeMidiDevice', $event.device);
-        }
-      "
-    ></v-select>
-  </div>
+  <v-select
+    hide-details
+    placeholder="Select your midi device"
+    label="Midi Device"
+    outlined
+    :items="deviceItems"
+    :value="midiDevice ? midiDevice.id : null"
+    return-object
+    @input="
+      ($event) => {
+        $store.commit('storeMidiDevice', $event.device);
+      }
+    "
+  ></v-select>
 </template>
 
 <script>

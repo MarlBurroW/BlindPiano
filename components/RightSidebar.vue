@@ -13,4 +13,7 @@ export default {
 </script>
 
 <style>
+.v-navigation-drawer__content {
+  overflow-y: hidden;
+}
 </style>

@@ -1,12 +1,12 @@
 const events = require("../../../events");
 
 module.exports = (gameContext) => {
-  return (key) => {
+  return (payload) => {
     const game = gameContext.getGame();
     const me = gameContext.getMe();
 
     if (game && me) {
-      game.pressKey(key, me);
+      game.pressKey(payload, me);
     }
   };
 };
