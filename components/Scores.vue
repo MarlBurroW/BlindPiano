@@ -2,13 +2,13 @@
   <v-simple-table>
     <template v-slot:default>
       <tbody>
-        <tr v-for="(player, rank) in players" :key="player.id">
+        <tr v-for="(player, rank) in scoreOrderedPlayers" :key="player.id">
           <td
             width="50"
             class="rank"
             :style="{ borderLeft: `solid 10px ${player.color}` }"
           >
-            {{ rank + 1 }}
+            {{ $ordinal(rank + 1) }}
           </td>
 
           <td width="50">
@@ -37,12 +37,7 @@ import events from "../events";
 
 export default {
   mixins: [contextMixin],
-  props: {
-    players: {
-      type: Array,
-      required: true,
-    },
-  },
+  props: {},
 };
 </script>
 

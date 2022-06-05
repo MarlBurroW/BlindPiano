@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto">
+  <v-card max-width="500" color="grey darken-3" class="mx-auto">
     <v-card-title class="d-flex justify-center">{{ song.title }}</v-card-title>
 
     <v-card-subtitle class="d-flex justify-center">{{
@@ -8,8 +8,12 @@
 
     <slot></slot>
 
-    <vue-plyr :options="{ autoplay }">
-      <div data-plyr-provider="youtube" :data-plyr-embed-id="song.id"></div>
+    <vue-plyr :options="{ autoplay, ratio: '16:9' }">
+      <div
+        class="player"
+        data-plyr-provider="youtube"
+        :data-plyr-embed-id="song.id"
+      ></div>
     </vue-plyr>
   </v-card>
 </template>
@@ -29,5 +33,8 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.player {
+  height: 400px;
+}
 </style>

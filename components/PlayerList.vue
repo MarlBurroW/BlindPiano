@@ -1,5 +1,6 @@
 <template>
   <div class="pa-5">
+
     <v-card
       :style="{ borderColor: player.color, opacity: player.online ? 1 : 0.3 }"
       v-for="player in players"
@@ -22,19 +23,19 @@
               <v-icon
                 size="20"
                 color="warning"
-                v-if="game.leaderId === player.id"
+                v-if="player.leader"
                 >mdi-star</v-icon
               >{{ player.nickname }}
             </p>
 
-            <div v-if="getPlayerScore(player.id)" class="mt-3">
+            <!-- <div class="mt-3">
               <strong
                 style="font-size: 25px"
                 :style="{ color: player.color }"
                 >{{ getPlayerScore(player.id) }}</strong
               >
               points
-            </div>
+            </div> -->
           </v-card-text>
         </div>
 
@@ -73,9 +74,29 @@ import contextMixin from "../mixins/context-mixin";
 import events from "../events";
 
 export default {
-  mixins: [contextMixin],
-  props: {},
+  mixins: [],
+  props: {
+
+    players: {
+      type: Array
+    },
+    me: {
+      type: Object
+    },
+    game: {
+      type: Object
+    }
+
+  },
+
+  computed: {
+
+      isLeader() {
+        return this.me.id == this.game.leaderId
+      }
+  },
   methods: {
+ 
     kick(player) {
       this.socket.emit(events.KICK_PLAYER, player.id);
     },

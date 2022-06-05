@@ -1,10 +1,10 @@
 const events = require("../../../events");
 
 module.exports = (gameContext) => {
-  return (playerId) => {
+  return (personId) => {
     const game = gameContext.getGame();
     const me = gameContext.getMe();
-    const player = game.findPlayerById(playerId);
+    const person = game.findPersonById(personId);
     const socket = gameContext.getSocket();
 
     if (!me.isLeaderOf(game)) {
@@ -15,10 +15,10 @@ module.exports = (gameContext) => {
       return;
     }
 
-    if (player) {
-      game.promote(player);
+    if (person) {
+      game.promote(person);
 
-      game.emitToPlayer(player, events.MESSAGE, {
+      game.emitToPerson(person, events.MESSAGE, {
         type: "info",
         message: "You have been promoted has leader",
       });

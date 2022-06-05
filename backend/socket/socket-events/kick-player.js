@@ -1,13 +1,11 @@
 const events = require("../../../events");
 
 module.exports = (gameContext) => {
-  return (playerId) => {
+  return (personId) => {
     const game = gameContext.getGame();
     const me = gameContext.getMe();
-    const player = game.findPlayerById(playerId);
+    const person = game.findPersonById(personId);
     const socket = gameContext.getSocket();
-
-    console.log(me.id, game.leaderId);
 
     if (!me.isLeaderOf(game)) {
       socket.emit(events.MESSAGE, {
@@ -17,15 +15,15 @@ module.exports = (gameContext) => {
       return;
     }
 
-    if (player) {
-      game.emitToPlayer(player, events.MESSAGE, {
+    if (person) {
+      game.emitToPerson(person, events.MESSAGE, {
         type: "error",
         message: "You have been kicked",
       });
 
-      player.disconnect();
+      person.disconnect();
 
-      game.removePlayerById(player.id);
+      game.removePersonById(person.id);
 
       socket.emit(events.MESSAGE, {
         type: "success",

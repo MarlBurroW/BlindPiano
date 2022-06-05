@@ -1,19 +1,31 @@
 <template>
-  <v-card class="keyboard" color="darken-4">
+  <v-card class="keyboard" flat color="grey  darken-4">
     <div class="d-flex keyboard-control align-center">
-      <div class="control">
-        <PianoSlider
-          :scroll-progress-percent="scrollProgress"
-          :bar-size-percent="scrollBarSize"
-          @slider-progress-changed="scrollPiano"
+      <div class="control d-flex align-center">
+        <v-switch
+          class="mr-5"
+          label="Show keyboard keys"
+          v-model="showKeyboardCaption"
+        ></v-switch>
+        <v-btn
+          rounded
+          color="primary"
+          class="mr-5"
+          :disabled="keyboardOctave <= 0"
+          @click="octaveDown"
+          >Octave -</v-btn
         >
-          <Piano
-            small
-            @key-pressed="keyPressed"
-            @key-released="keyReleased"
-          ></Piano>
-        </PianoSlider>
+
+        <v-btn
+          rounded
+          color="primary"
+          class="mr-5"
+          :disabled="keyboardOctave >= 6"
+          @click="octaveUp"
+          >Octave +</v-btn
+        >
       </div>
+
       <div class="control">
         <MidiDeviceSelection></MidiDeviceSelection>
       </div>
@@ -29,10 +41,23 @@
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon><v-icon>mdi-tune</v-icon></v-btn>
           </template>
+
+          <v-toolbar flat>
+            <v-toolbar-title class="mr-5">Master Volume</v-toolbar-title>
+
+            <v-icon class="mr-5">mdi-volume-low</v-icon>
+            <v-slider
+              hide-details
+              v-model="masterVolume"
+              max="10"
+              min="-80"
+            ></v-slider>
+            <v-icon class="ml-5">mdi-volume-high</v-icon>
+          </v-toolbar>
           <v-list class="pa-0">
             <v-list-item
               :style="{ borderLeft: `solid 10px ${player.color}` }"
-              v-for="player in players"
+              v-for="player in game.players"
               :key="player.id"
             >
               <v-list-item-avatar>
@@ -107,25 +132,19 @@
 
     <div class="d-flex">
       <div class="px-5"></div>
-      <vue-scroll
-        ref="pianoScroller"
-        :ops="scrollOptions"
-        @handle-scroll="pianoScrolled"
-      >
-        <Piano
-          ref="piano"
-          @key-pressed="keyPressed"
-          @key-released="keyReleased"
-        ></Piano>
+      <vue-scroll ref="pianoScroller" :ops="scrollOptions">
+        <div class="piano-scroller">
+          <Piano
+            ref="piano"
+            :show-keyboard-caption="showKeyboardCaption"
+            :keyboard-octave="keyboardOctave"
+            @key-pressed="keyPressed"
+            @key-released="keyReleased"
+          ></Piano>
+        </div>
       </vue-scroll>
       <div class="px-5">
-        <v-slider
-          vertical
-          max="10"
-          min="-60"
-          :value="getLocalPlayerSetting(me.id, 'volume')"
-          @input="setLocalPlayerSetting(me.id, 'volume', $event)"
-        ></v-slider>
+        <v-slider vertical max="10" min="-60" v-model="masterVolume"></v-slider>
       </div>
     </div>
   </v-card>
@@ -152,7 +171,6 @@ export default {
     }
 
     this.eventBus.on("key-pressed", (payload) => {
-      console.log(payload.from);
       const visibility = this.getLocalPlayerSetting(payload.from, "visibility");
       if (visibility) {
         this.$refs.piano.pressKey(payload.key.midi, payload.color);
@@ -164,6 +182,10 @@ export default {
       if (visibility) {
         this.$refs.piano.releaseKey(payload.key.midi);
       }
+    });
+
+    this.eventBus.on("reset", () => {
+      this.$refs.piano.resetKeys();
     });
   },
   computed: {},
@@ -181,7 +203,20 @@ export default {
   },
 
   methods: {
+    octaveDown() {
+      if (this.keyboardOctave >= 1) {
+        this.$refs.piano.resetKeys();
+        this.keyboardOctave -= 1;
+      }
+    },
+    octaveUp() {
+      if (this.keyboardOctave <= 5) {
+        this.$refs.piano.resetKeys();
+        this.keyboardOctave += 1;
+      }
+    },
     getInstrumentAndPresetNameById,
+
     bindDeviceEvents(midiDevice) {
       midiDevice.addListener("controlchange", (e) => {
         if (e.controller.name == "holdpedal") {
@@ -197,8 +232,10 @@ export default {
           this.$refs.piano.pressKey(e.note.number);
 
           const key = this.$refs.piano.getKeyFromMidi(e.note.number);
-          key.velocity = e.note.attack;
-          this.keyPressed(key);
+          if (key) {
+            key.velocity = e.note.attack;
+            this.keyPressed(key);
+          }
         }
       });
 
@@ -206,23 +243,11 @@ export default {
         if (this.$refs.piano) {
           this.$refs.piano.releaseKey(e.note.number);
           const key = this.$refs.piano.getKeyFromMidi(e.note.number);
-          this.keyReleased(key);
+          if (key) {
+            this.keyReleased(key);
+          }
         }
       });
-    },
-
-    scrollPiano(percent) {
-      this.$refs.pianoScroller.scrollTo(
-        {
-          x: `${percent}%`,
-        },
-        0
-      );
-    },
-
-    pianoScrolled(vertical, horizontal, nativeEvent) {
-      this.scrollBarSize = horizontal.barSize * 100;
-      this.scrollProgress = horizontal.process * 100;
     },
 
     keyPressed(key) {
@@ -238,6 +263,8 @@ export default {
   },
   data() {
     return {
+      showKeyboardCaption: false,
+      keyboardOctave: 3,
       volume: 0,
       piano: null,
       scrollBarSize: null,
@@ -245,22 +272,38 @@ export default {
       scrollOptions: {
         bar: {
           showDelay: 500,
-          onlyShowBarOnScroll: true,
-          keepShow: false,
-          background: "#121212",
+          onlyShowBarOnScroll: false,
+          keepShow: true,
+          background: "#2196F3",
           opacity: 1,
           hoverStyle: false,
           specifyBorderRadius: false,
           minSize: 0,
-          size: "6px",
+          size: "20px",
           disable: false,
+        },
+        rail: {
+          background: "#363636",
+          opacity: 1,
+          size: "30px",
+          specifyBorderRadius: false,
+          gutterOfEnds: null,
+          gutterOfSide: "5px",
+          keepShow: false,
+        },
+        scrollButton: {
+          enable: true,
+          background: "#2196F3",
+          opacity: 1,
+          step: 180,
+          mousedownStep: 30,
         },
         vuescroll: {
           mode: "native",
-          sizeStrategy: "percent",
+          sizeStrategy: "number",
           detectResize: true,
           zooming: false,
-
+          wheelDirectionReverse: true,
           scroller: {
             bouncing: {
               left: 0,
@@ -286,5 +329,9 @@ export default {
     width: 100%;
     margin-right: 10px;
   }
+}
+
+.piano-scroller {
+  padding-bottom: 40px;
 }
 </style>

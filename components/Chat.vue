@@ -1,6 +1,6 @@
 <template>
   <v-card flat class="d-flex flex-column fill-height">
-    <v-toolbar dense class="shrink">
+    <!-- <v-toolbar dense class="shrink">
       <v-spacer></v-spacer>
 
       <v-switch
@@ -8,7 +8,7 @@
         label="Auto scroll"
         v-model="autoScroll"
       ></v-switch>
-    </v-toolbar>
+    </v-toolbar> -->
 
     <v-card-text class="flex-grow-1 overflow-y-auto pa-3">
       <vue-scroll ref="scroller" :ops="scrollOptions">

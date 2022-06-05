@@ -5,7 +5,7 @@
         <h1>Current Score</h1>
       </v-card-title>
       <v-card-text class="mb-5">
-        <Scores :players="scoreOrderedPlayers"></Scores>
+        <Scores></Scores>
       </v-card-text>
 
       <v-card-text

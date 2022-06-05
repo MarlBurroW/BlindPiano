@@ -13,6 +13,8 @@ import Transitions from "vue2-transitions";
 import VuePlyr from "vue-plyr";
 import "vue-plyr/dist/vue-plyr.css";
 
+import ordinal from "ordinal";
+
 export default async (app, inject) => {
   Vue.component(Avataaars);
   Vue.use(VueChatScroll);
@@ -66,4 +68,6 @@ export default async (app, inject) => {
   });
   VueClipboard.config.autoSetContainer = true;
   Vue.use(VueClipboard);
+
+  inject("ordinal", ordinal);
 };

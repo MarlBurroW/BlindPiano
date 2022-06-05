@@ -1,21 +1,40 @@
 import Vue from "vue";
+import * as Tone from "tone";
 
-import newPlayer from "../assets/sounds/new-player.mp3";
-import playerDisconnect from "../assets/sounds/player-disconnect.mp3";
-import success from "../assets/sounds/success.mp3";
-import tic from "../assets/sounds/tic.mp3";
-import start from "../assets/sounds/start.mp3";
+let latestPlayTime = 0;
 
-export default async (app, inject) => {
+export default (app, inject) => {
   const sounds = {
-    "new-player": new Audio(newPlayer),
-    "player-disconnect": new Audio(playerDisconnect),
-    success: new Audio(success),
-    tic: new Audio(tic),
-    start: new Audio(start),
+    "new-player": new Tone.Player("/sfx/new-player.mp3"),
+    "player-disconnect": new Tone.Player("/sfx/player-disconnect.mp3"),
+    success: new Tone.Player("/sfx/success.mp3"),
+    tic: new Tone.Player("/sfx/tic.mp3"),
+    start: new Tone.Player("/sfx/start.mp3"),
   };
 
+  const sfxVolumeNode = new Tone.Volume(0);
+
+  for (const key in sounds) {
+    if (Object.hasOwnProperty.call(sounds, key)) {
+      const sound = sounds[key];
+
+      sound.connect(sfxVolumeNode);
+    }
+  }
+
+  inject("connectSFX", (volumeNode) => {
+    sfxVolumeNode.connect(volumeNode);
+  });
+
   inject("playSFX", (sfxId) => {
-    sounds[sfxId].play();
+    let now = Tone.now();
+
+    if (latestPlayTime === now) {
+      now += 0.001;
+    }
+
+    latestPlayTime = now;
+
+    sounds[sfxId].start(now);
   });
 };

@@ -1,10 +1,10 @@
 const GameManager = require("./GameManager.js");
-const PlayerManager = require("./PlayerManager.js");
+const PersonManager = require("./PersonManager.js");
 
 class App {
   constructor() {
     this.gameManager = new GameManager();
-    this.playerManager = new PlayerManager();
+    this.personManager = new PersonManager();
   }
 }
 

@@ -8,7 +8,7 @@ module.exports = (gameContext) => {
     const me = gameContext.getMe();
 
     if (game && me) {
-      game.removePlayerById(me.id);
+      game.removePersonById(me.id);
 
       game.emit(events.PLAYER_DISCONNECTED, me.toClientResource());
     }

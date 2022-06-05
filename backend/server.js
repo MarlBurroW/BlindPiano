@@ -18,6 +18,8 @@ for (let i = 0; i < apiControllers.length; i++) {
 
 app.use("/samples", express.static(__dirname + "/samples"));
 app.use("/samples", serveIndex(__dirname + "/samples"));
+app.use("/sfx", express.static(__dirname + "/sfx"));
+app.use("/sfx", serveIndex(__dirname + "/sfx"));
 
 start()
   .then((app) => {

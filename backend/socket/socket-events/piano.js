@@ -1,10 +1,10 @@
 const events = require("../../../events");
 
 module.exports = (gameContext) => {
-  return (playerId) => {
+  return (personId) => {
     const game = gameContext.getGame();
     const me = gameContext.getMe();
-    const player = game.findPlayerById(playerId);
+    const player = game.findPersonById(personId);
     const socket = gameContext.getSocket();
   };
 };

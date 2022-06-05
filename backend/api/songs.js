@@ -39,7 +39,7 @@ router.get("/songs/search_audiodb_song", async (req, res, next) => {
 
 router.get("/songs/search_youtube", async (req, res, next) => {
   const client = await youtube.getClient();
-  console.log(req.query.search);
+
   client
     .search(req.query.search)
     .then((results) => {

@@ -22,6 +22,14 @@ export default {
         return this.$store.state.game;
       },
     },
+    masterVolume: {
+      set(masterVolume) {
+        this.$store.commit("storeMasterVolume", masterVolume);
+      },
+      get() {
+        return this.$store.state.masterVolume;
+      },
+    },
     turnInfo: {
       set(turnInfo) {
         this.$store.commit("storePrivateTurnInfo", turnInfo);
@@ -78,7 +86,9 @@ export default {
         return this.$store.state.preset;
       },
     },
-
+    spectators() {
+      return this.game ? this.game.spectators : [];
+    },
     gameState() {
       return this.game ? this.game.state : null;
     },
@@ -129,6 +139,33 @@ export default {
       return this.$store.state.localPlayersSettings;
     },
 
+    currentGameState() {
+      const mapping = {
+        WAITING_PLAYERS_SCREEN: "Waiting players",
+        PRE_TURN_SCREEN: "",
+        FINISHED: "Game finished",
+        LEARNING_SONG_SCREEN: "Learning",
+        CHOOSE_SONG_SCREEN: "Song choice",
+        PLAY_SONG_SCREEN: "Playing song",
+        SCORES_SCREEN: "Scores",
+        FINAL_SCREEN: "Game finished",
+        RESPONSE_SCREEN: "Response",
+      };
+
+      if (this.game && this.game.state) {
+        return mapping[this.game.state.type];
+      } else {
+        return null;
+      }
+    },
+    showKeyboard: {
+      set(showKeyboard) {
+        this.$store.commit("storeShowKeyboard", showKeyboard);
+      },
+      get() {
+        return this.$store.state.showKeyboard;
+      },
+    },
     leftDrawer: {
       set(drawer) {
         this.$store.commit("storeLeftDrawer", drawer);
@@ -146,24 +183,19 @@ export default {
       },
     },
 
-    players() {
-      if (this.game) {
-        return this.game.players;
-      } else {
-        return [];
-      }
+    spectators() {
+      return this.game.spectators.map((p) => {
+        p.leader = this.game.leaderId == p.id;
+
+        return p;
+      });
     },
 
     scoreOrderedPlayers() {
-      if (this.game && this.game.players) {
-        return this.game.players
-          .map((p) => {
-            p.score = this.game.scores[p.id];
-            return p;
-          })
-          .sort((a, b) => {
-            return b.score - a.score;
-          });
+      if (this.players) {
+        return this.players.sort((a, b) => {
+          return b.score - a.score;
+        });
       } else {
         return [];
       }
@@ -189,6 +221,10 @@ export default {
     },
     getPlayerScore(playerId) {
       return this.game.scores[playerId] || 0;
+    },
+
+    getPlayerById(playerId) {
+      return this.game.players[playerId] || null;
     },
   },
 };

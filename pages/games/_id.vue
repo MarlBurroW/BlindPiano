@@ -2,81 +2,74 @@
   <div class="fill-height">
     <AppBar></AppBar>
     <left-sidebar></left-sidebar>
-
-    <v-main app class="fill-height">
-      <v-toolbar dense v-if="game && game.state && game.state.turn">
-        <v-toolbar-title v-if="currentRound">
-          Round {{ currentRound.number }}/{{ game.roundCount }}
-        </v-toolbar-title>
-
-        <v-toolbar-title v-if="currentTurnPlayer">
-          &nbsp;|&nbsp;
-          <span :style="{ color: currentTurnPlayer.color }">{{
-            currentTurnPlayer.nickname
-          }}</span
-          >'s turn
-        </v-toolbar-title>
-
-        <v-toolbar-title v-if="countDown">
-          &nbsp;|&nbsp;<strong>{{ $formatSeconds(countDown) }}</strong>
-        </v-toolbar-title>
-      </v-toolbar>
-      <vue-scroll :ops="scrollOptions">
-        <div class="d-flex flex-column fill-height">
-          <div class="flex-grow-1" v-if="game">
-            <zoom-center-transition mode="out-in">
-              <WaitPlayers
-                v-if="gameState.type == gameStates.WAITING_PLAYERS_SCREEN"
-              ></WaitPlayers>
-
-              <PreTurn
-                v-else-if="gameState.type == gameStates.PRE_TURN_SCREEN"
-              ></PreTurn>
-
-              <ChooseSongScreen
-                v-else-if="gameState.type == gameStates.CHOOSE_SONG_SCREEN"
-              ></ChooseSongScreen>
-              <LearnSong
-                v-else-if="gameState.type == gameStates.LEARNING_SONG_SCREEN"
-              ></LearnSong>
-
-              <PlaySong
-                v-else-if="gameState.type == gameStates.PLAY_SONG_SCREEN"
-              ></PlaySong>
-
-              <ScoresScreen
-                v-else-if="gameState.type == gameStates.SCORES_SCREEN"
-              ></ScoresScreen>
-              <FinalScreen
-                v-else-if="gameState.type == gameStates.FINAL_SCREEN"
-              ></FinalScreen>
-
-              <ResponseScreen
-                v-else-if="gameState.type == gameStates.RESPONSE_SCREEN"
-              ></ResponseScreen>
-            </zoom-center-transition>
-          </div>
-        </div>
-      </vue-scroll>
-    </v-main>
     <right-sidebar></right-sidebar>
-    <v-footer app padless v-if="game && socket">
+
+    <v-main app v-if="game">
       <Instrument
-        v-for="player in players"
+        v-for="player in game.players"
         :key="player.key"
         :volume="getLocalPlayerSetting(player.id, 'volume')"
         :instrument="player.instrument"
         :preset="player.preset"
         :player="player"
         :event-bus="keyboardEventBus"
+        :master-volume="masterVolumeNode"
       ></Instrument>
 
-      <Keyboard :volume.sync="volume" :event-bus="keyboardEventBus"></Keyboard>
-    </v-footer>
+      <GameProgress></GameProgress>
+      <vue-scroll :ops="scrollOptions">
+        <div class="d-flex flex-column fill-height">
+          <div class="flex-grow-1" v-if="game">
+            <fade-transition mode="out-in">
+              <WaitPlayers
+                v-if="game.hasState(gameStates.WAITING_PLAYERS_SCREEN)"
+              ></WaitPlayers>
+
+              <PreTurn
+                v-else-if="game.hasState(gameStates.PRE_TURN_SCREEN)"
+              ></PreTurn>
+
+              <ChooseSongScreen
+                v-else-if="game.hasState(gameStates.CHOOSE_SONG_SCREEN)"
+              ></ChooseSongScreen>
+              <LearnSong
+                v-else-if="game.hasState(gameStates.LEARNING_SONG_SCREEN)"
+              ></LearnSong>
+
+              <PlaySong
+                v-else-if="game.hasState(gameStates.PLAY_SONG_SCREEN)"
+              ></PlaySong>
+
+              <ScoresScreen
+                v-else-if="game.hasState(gameStates.SCORES_SCREEN)"
+              ></ScoresScreen>
+              <FinalScreen
+                v-else-if="game.hasState(gameStates.FINAL_SCREEN)"
+              ></FinalScreen>
+
+              <ResponseScreen
+                v-else-if="game.hasState(gameStates.RESPONSE_SCREEN)"
+              ></ResponseScreen>
+            </fade-transition>
+          </div>
+        </div>
+      </vue-scroll>
+    </v-main>
+
     <JoinGameDialog
       @user-created="joinGameSocket(gameId, $event)"
       :open="joinDialog"
     ></JoinGameDialog>
+
+    <v-footer
+      color="grey darken-4"
+      app
+      padless
+      v-if="game && socket"
+      class="d-flex justify-center footer"
+    >
+      <Keyboard :volume.sync="volume" :event-bus="keyboardEventBus"></Keyboard>
+    </v-footer>
   </div>
 </template>
 
@@ -85,6 +78,7 @@ import contextMixin from "../../mixins/context-mixin";
 import { io } from "socket.io-client";
 import events from "../../events";
 import EventEmitter from "events";
+import * as Tone from "tone";
 
 export default {
   layout: "default",
@@ -92,10 +86,16 @@ export default {
   props: {},
 
   mounted() {
+    this.$connectSFX(this.masterVolumeNode);
+
     this.gameId = this.$route.params.id;
 
     const socket = io();
     this.$setSocketInstance(socket);
+
+    socket.onAny((eventName) => {
+      console.log(eventName);
+    });
 
     this.socket.on(events.DISCONNECT, (game) => {
       this.$notyf.error("Socket disconnected");
@@ -103,6 +103,7 @@ export default {
     });
 
     this.socket.on(events.CONNECT, (game) => {
+      console.log("Socket connected");
       this.joinGameSocket(this.gameId, this.claimToken);
     });
 
@@ -150,7 +151,6 @@ export default {
     });
 
     this.socket.on(events.LOG, (message) => {
-      console.log(message);
       this.$store.commit("addChatMessage", message);
     });
 
@@ -206,6 +206,16 @@ export default {
   },
 
   watch: {
+    masterVolume(val) {
+      this.masterVolumeNode.volume.value = val;
+    },
+
+    "game.state.type": {
+      handler() {
+        this.keyboardEventBus.emit("reset");
+      },
+    },
+
     midiDevice(midiDevice) {
       this.socket.emit(
         events.UPDATE_DEVICE_NAME,
@@ -261,6 +271,7 @@ export default {
     return {
       keyboardEventBus: new EventEmitter(),
       volume: 0,
+      masterVolumeNode: new Tone.Volume(0).toDestination(),
       joinDialog: false,
       turnTimer: 0,
 

@@ -31,34 +31,10 @@
           v-clipboard:copy="$gameLink(game)"
           v-clipboard:success="() => $notyf.success('Link copied')"
         ></v-text-field>
+      </v-card-text>
 
-        <v-list subheader>
-          <v-subheader
-            >{{ game.players.length }}
-            {{ game.players.length > 1 ? "players" : "player" }} in the
-            party</v-subheader
-          >
-
-          <v-row>
-            <v-col
-              xs="12"
-              sm="12"
-              md="6"
-              lg="4"
-              :key="player.id"
-              v-for="player in game.players"
-            >
-              <player-card
-                :leader="player.id === game.leaderId"
-                :player="player"
-                :me="me"
-                :game="game"
-                @kick="kick($event)"
-                @promote="promote($event)"
-              ></player-card>
-            </v-col>
-          </v-row>
-        </v-list>
+      <v-card-text>
+        <v-btn @click="spectator">Spectate</v-btn>
       </v-card-text>
     </v-card>
 
@@ -185,6 +161,9 @@ export default {
     },
     promote(player) {
       this.socket.emit(events.PROMOTE, player.id);
+    },
+    spectator() {
+      this.socket.emit(events.SPECTATOR);
     },
   },
   computed: {},

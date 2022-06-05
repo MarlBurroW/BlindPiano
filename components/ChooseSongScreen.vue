@@ -3,7 +3,7 @@
     <div v-if="turnInfo && isMyTurn">
       <v-card fill-height class="fill-height pa-10">
         <v-card-title class="mb-5 justify-center">
-          <h1>Choose your song ({{ $formatSeconds(game.state.countDown) }})</h1>
+          <h1>Choose your song ({{ $formatSeconds(game.countDown) }})</h1>
         </v-card-title>
         <v-card-text class="mb-5">
           <v-row>
@@ -37,7 +37,7 @@
       </div>
 
       <div class="countdown">
-        {{ $formatSeconds(this.game.state.countDown) }}
+        {{ $formatSeconds(this.game.countDown) }}
       </div>
     </div>
   </div>
@@ -58,9 +58,7 @@ export default {
   },
   computed: {
     player() {
-      return this.game.players.find(
-        (p) => p.id === this.game.state.turn.playerId
-      );
+      return this.game.turnPlayer;
     },
   },
 };

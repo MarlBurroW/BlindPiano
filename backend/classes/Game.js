@@ -15,7 +15,8 @@ const InternalEvents = {
 class Game {
   constructor(id) {
     this.id = id;
-    this.players = [];
+    this.persons = [];
+
     this.state = {
       type: gameStates.WAITING_PLAYERS_SCREEN,
     };
@@ -31,7 +32,7 @@ class Game {
     this.guessSimilarityThreshold = 0.5;
     this.roundCount = 3;
     this.learnTime = 60;
-    this.chooseTime = 10;
+    this.chooseTime = 20;
     this.chooseCount = 2;
     this.playTime = 60;
     this.ticTime = 5;
@@ -64,6 +65,14 @@ class Game {
     this.internalEventEmitter = new EventEmitter();
   }
 
+  get players() {
+    return this.persons.filter((p) => !p.spectator);
+  }
+
+  get spectators() {
+    return this.persons.filter((p) => p.spectator);
+  }
+
   setIO(io) {
     this.io = io;
   }
@@ -72,21 +81,18 @@ class Game {
     this.io.to(this.id).emit(event, payload);
   }
 
-  emitToPlayer(player, event, payload) {
-    if (player.isOnline()) {
-      this.io.to(player.getSocket().id).emit(event, payload);
+  emitToPerson(person, event, payload) {
+    if (person.isOnline()) {
+      this.io.to(person.getSocket().id).emit(event, payload);
     }
-  }
-
-  findPlayerBySocketId(socketId) {
-    return _.find(
-      this.players.filter((p) => p.socket),
-      (p) => p.socket.id === socketId
-    );
   }
 
   playerCount() {
     return this.players.length;
+  }
+
+  personCount() {
+    return this.persons.length;
   }
 
   emptyCheck() {
@@ -98,21 +104,21 @@ class Game {
   }
 
   getAvailableColor() {
-    const alreadyUsedColors = this.players
+    const alreadyUsedColors = this.persons
       .filter((p) => p.color)
       .map((p) => p.color);
 
     return _.difference(this.playerColors, alreadyUsedColors);
   }
 
-  addPlayer(player) {
-    this.players.push(player);
-    player.setColor(_.sample(this.getAvailableColor()));
+  addPerson(person) {
+    this.persons.push(person);
+    person.setColor(_.sample(this.getAvailableColor()));
     this.electNewLeaderIfNeeded();
-    this.emptyCheck();
+    // this.emptyCheck();
     this.gameUpdate();
 
-    this.log(`${player.nickname} has joined the game`);
+    this.log(`${person.nickname} has joined the game`);
   }
 
   hasLeader() {
@@ -141,6 +147,7 @@ class Game {
   }
 
   gameUpdate() {
+    console.log("SEND GAME UPDATED");
     this.emit(events.GAME_UPDATED, this.toClientResource());
   }
 
@@ -161,16 +168,17 @@ class Game {
     }
   }
 
-  removePlayerById(playerId) {
-    const player = this.findPlayerById(playerId);
-    if (player) {
-      _.remove(this.players, (p) => p.id === player.id);
+  removePersonById(personId) {
+    const person = this.findPersonById(personId);
+    if (person) {
+      _.remove(this.persons, (p) => p.id === person.id);
       this.electNewLeaderIfNeeded();
-      this.emptyCheck();
-      this.removeTurnsByPlayerId(player.id);
+      // this.emptyCheck();
+      this.removeTurnsByPlayerId(person.id);
 
       const turn = this.getCurrentTurn();
-      if (turn && turn.player.id == player.id) {
+
+      if (turn && turn.player.id == person.id) {
         turn.finish();
         clearInterval(this.counterInterval);
 
@@ -180,22 +188,20 @@ class Game {
 
       this.gameUpdate();
 
-      this.log(`${player.nickname} has left the game`);
+      this.log(`${person.nickname} has left the game`);
     }
   }
 
-  findPlayerById(playerId) {
-    return _.find(this.players, (p) => p.id === playerId);
+  findPersonById(personId) {
+    return _.find(this.persons, (p) => p.id === personId);
   }
 
-  findPlayerByClaimToken(claimToken) {
-    return _.find(this.players, (p) => p.claimToken === claimToken);
+  findPersonByClaimToken(claimToken) {
+    return _.find(this.persons, (p) => p.claimToken === claimToken);
   }
 
   setState(state) {
     this.state = state;
-
-    this.players = _.shuffle(this.players);
 
     this.gameUpdate();
   }
@@ -267,7 +273,7 @@ class Game {
 
       this.gameUpdate();
 
-      this.emitToPlayer(
+      this.emitToPerson(
         turn.player,
         events.PRIVATE_TURN_INFO,
         turn.toPrivateResource()
@@ -292,7 +298,7 @@ class Game {
         if (counter <= 0) {
           clearInterval(this.counterInterval);
 
-          this.emitToPlayer(turn.player, events.PRIVATE_TURN_INFO, null);
+          this.emitToPerson(turn.player, events.PRIVATE_TURN_INFO, null);
           this.emit(events.PLAY_SFX, "start");
           resolve(turn);
         }
@@ -355,7 +361,7 @@ class Game {
 
       turn.setProposedSongs(songs);
 
-      this.emitToPlayer(
+      this.emitToPerson(
         turn.player,
         events.PRIVATE_TURN_INFO,
         turn.toPrivateResource()
@@ -375,7 +381,7 @@ class Game {
           this.playedSongs.push(song.id);
         }
 
-        this.emitToPlayer(turn.player, events.PRIVATE_TURN_INFO, null);
+        this.emitToPerson(turn.player, events.PRIVATE_TURN_INFO, null);
         clearInterval(this.counterInterval);
         resolve(turn);
       };
@@ -484,12 +490,15 @@ class Game {
   }
 
   start() {
+    console.log("Game started");
     if (this.players.length < 2) {
       return;
     }
 
+    const randomOrderedPlayers = _.shuffle(this.players);
+
     for (let i = 1; i <= this.roundCount; i++) {
-      const round = new Round(this.players, i);
+      const round = new Round(randomOrderedPlayers, i);
       this.rounds.push(round);
     }
 
@@ -501,7 +510,7 @@ class Game {
   }
 
   promote(player) {
-    if (this.findPlayerById(player.id)) {
+    if (this.findPersonById(player.id)) {
       this.leaderId = player.id;
       this.gameUpdate();
       this.log(`${player.nickname} has been promoted as leader`);
@@ -512,7 +521,8 @@ class Game {
     if (
       this.state &&
       (this.state.type == gameStates.WAITING_PLAYERS_SCREEN ||
-        this.state.type == gameStates.FINAL_SCREEN)
+        this.state.type == gameStates.FINAL_SCREEN ||
+        this.state.type == gameStates.LEARNING_SONG_SCREEN)
     ) {
       return true;
     }
@@ -529,22 +539,65 @@ class Game {
   }
 
   holdPedal(payload, player) {
-    if (this.shouldBroadcast(player)) {
-      payload.color = player && player.color ? player.color : null;
-      player.socket.broadcast.to(this.id).emit(events.HOLD_PEDAL, payload);
-    }
+    this.handleKeyboardInputsForwarding(player, payload, events.HOLD_PEDAL);
   }
 
   pressKey(payload, player) {
-    if (this.shouldBroadcast(player)) {
-      payload.color = player && player.color ? player.color : null;
-      player.socket.broadcast.to(this.id).emit(events.KEY_PRESSED, payload);
-    }
+    this.handleKeyboardInputsForwarding(player, payload, events.KEY_PRESSED);
   }
 
   unpressKey(payload, player) {
-    if (this.shouldBroadcast(player)) {
-      player.socket.broadcast.to(this.id).emit(events.KEY_RELEASED, payload);
+    this.handleKeyboardInputsForwarding(player, payload, events.KEY_RELEASED);
+  }
+
+  handleKeyboardInputsForwarding(player, payload, event) {
+    payload.color = player && player.color ? player.color : null;
+
+    switch (this.state.type) {
+      case gameStates.WAITING_PLAYERS_SCREEN:
+        player.socket.broadcast.to(this.id).emit(event, payload);
+        break;
+      case gameStates.SCORES_SCREEN:
+        player.socket.broadcast.to(this.id).emit(event, payload);
+        break;
+      case gameStates.FINAL_SCREEN:
+        player.socket.broadcast.to(this.id).emit(event, payload);
+        break;
+
+      case gameStates.CHOOSE_SONG_SCREEN:
+        if (player.id !== this.state.turn.playerId) {
+          for (let i = 0; i < this.players.length; i++) {
+            const destPlayer = this.players[i];
+
+            if (destPlayer.id === this.state.turn.playerId) continue;
+
+            player.socket.broadcast
+              .to(destPlayer.socket.id)
+              .emit(event, payload);
+          }
+        }
+
+        break;
+
+      case gameStates.PLAY_SONG_SCREEN:
+        if (player.id === this.state.turn.playerId) {
+          player.socket.broadcast.to(this.id).emit(event, payload);
+        }
+
+        break;
+      case gameStates.LEARNING_SONG_SCREEN:
+        if (player.id !== this.state.turn.playerId) {
+          for (let i = 0; i < this.players.length; i++) {
+            const destPlayer = this.players[i];
+
+            if (destPlayer.id === this.state.turn.playerId) continue;
+
+            player.socket.broadcast
+              .to(destPlayer.socket.id)
+              .emit(event, payload);
+          }
+        }
+        break;
     }
   }
 
@@ -560,7 +613,7 @@ class Game {
     const message = new LogMessage(content, color);
 
     if (player) {
-      this.emitToPlayer(player, events.LOG, message.toClientResource());
+      this.emitToPerson(player, events.LOG, message.toClientResource());
     } else {
       this.emit(events.LOG, message.toClientResource());
     }
@@ -575,8 +628,6 @@ class Game {
         .map((p) => {
           return turn.songWins[p.id] && turn.artistWins[p.id];
         });
-
-      console.log(results);
 
       if (results.every((v) => v === true)) {
         return true;
@@ -664,14 +715,42 @@ class Game {
     }
   }
 
+  getGameStructure() {
+    const currentRound = this.getCurrentRound();
+
+    const currentRoundNum = currentRound ? currentRound.number : null;
+
+    const currentTurn = this.getCurrentTurn();
+
+    return this.rounds.map((round) => {
+      return {
+        number: round.number,
+        name: round.name,
+        finished: round.isFinished(),
+        current: currentRoundNum === round.number,
+        turns: round.turns.map((turn) => {
+          return {
+            playerId: turn.player.id,
+            nickname: turn.player.nickname,
+            finished: turn.finished,
+            color: turn.player.color,
+            current: currentTurn && currentTurn.player.id == turn.player.id,
+          };
+        }),
+      };
+    });
+  }
+
   toClientResource() {
     return {
       id: this.id,
       state: this.state,
       leaderId: this.leaderId,
-      players: this.players.map((p) => p.toClientResource()),
+      persons: this.persons.map((p) => p.toClientResource()),
+
       scores: this.scores,
       roundCount: this.roundCount,
+      progress: this.getGameStructure(),
       options: {
         roundCount: this.roundCount,
         learnTime: this.learnTime,

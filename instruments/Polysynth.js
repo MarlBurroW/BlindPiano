@@ -4,7 +4,24 @@ class PolySynth {
   constructor() {
     this.id = "polysynth";
     this.volumeNode = null;
+    this.preset = this.constructor.getPresets()[0];
+    this.createInstrument();
+  }
+  createInstrument() {
+    if (this.instrument) {
+      this.instrument.disconnect();
+      this.instrument.dispose();
+    }
+
     this.instrument = new Tone.PolySynth();
+
+    if (this.preset) {
+      this.instrument.set(this.preset.content);
+    }
+
+    if (this.volumeNode) {
+      this.instrument.connect(this.volumeNode);
+    }
   }
 
   setVolumeNode(volumeNode) {
@@ -22,10 +39,17 @@ class PolySynth {
   setPresetById(presetId) {
     const presets = this.constructor.getPresets();
     const preset = presets.find((p) => p.id === presetId);
+
+    this.preset = preset;
     this.instrument.set(Tone.PolySynth.getDefaults());
     this.instrument.set(preset.content);
   }
-
+  reset() {
+    this.createInstrument();
+  }
+  destroy() {
+    this.instrument.dispose();
+  }
   static getPresets() {
     return [
       {

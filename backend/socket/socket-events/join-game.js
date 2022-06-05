@@ -6,7 +6,12 @@ module.exports = (gameContext) => {
     const game = gameContext.getApp().gameManager.findGameById(gameId);
     const socket = gameContext.getSocket();
 
+    console.log(
+      `Socket ${socket.id} joining game ${gameId} with claimToken ${claimToken}`
+    );
+
     if (!game) {
+      console.log(`Game ${gameId} not found`);
       socket.emit(events.GAME_NOT_FOUND);
       return;
     }
@@ -18,17 +23,25 @@ module.exports = (gameContext) => {
 
     gameContext.setGame(game);
 
-    const me = game.findPlayerByClaimToken(claimToken);
+    const me = game.findPersonByClaimToken(claimToken);
 
     if (me) {
+      console.log(
+        `User  ${me.nickname} found  for the claim token ${claimToken}`
+      );
       gameContext.setMe(me);
     } else {
+      console.log(
+        `No user found for the claim token ${claimToken}, asking nickname`
+      );
       socket.emit(events.ASK_NICKNAME);
       return;
     }
 
+    console.log(`Attaching socket ${socket.id} to the user ${me.nickname}`);
     me.attachSocket(socket);
 
+    console.log(`Make socket ${socket.id} joining the room ${game.id}`);
     socket.join(game.id);
 
     socket.emit(events.GAME_JOINED, {

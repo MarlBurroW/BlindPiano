@@ -1,4 +1,5 @@
 import Vue from "vue";
+import Game from "../classes/Game";
 
 export const state = () => ({
   claimToken: null,
@@ -15,11 +16,19 @@ export const state = () => ({
   instrument: "piano",
   preset: null,
   localPlayersSettings: {},
+  showKeyboard: true,
+  masterVolume: 0,
 });
 
 export const mutations = {
+  storeMasterVolume(state, masterVolume) {
+    state.masterVolume = masterVolume;
+  },
   storeLeftDrawer(state, leftDrawer) {
     state.leftDrawer = leftDrawer;
+  },
+  storeShowKeyboard(state, showKeyboard) {
+    state.showKeyboard = showKeyboard;
   },
 
   storeRightDrawer(state, rightDrawer) {
@@ -33,11 +42,10 @@ export const mutations = {
     state.me = me;
   },
   storeGame(state, game) {
-    state.game = game;
-
     if (game) {
-      for (let i = 0; i < game.players.length; i++) {
-        const player = game.players[i];
+      state.game = new Game(game);
+      for (let i = 0; i < state.game.players.length; i++) {
+        const player = state.game.players[i];
 
         if (!state.localPlayersSettings[player.id]) {
           Vue.set(state.localPlayersSettings, player.id, {

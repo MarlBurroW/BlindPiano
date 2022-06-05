@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <div v-if="!slider">Total Width: {{ totalWidth }}</div>
-    <div v-if="!slider">Visible Width: {{ visibleWidth }}</div> -->
     <div class="piano" :class="{ small: this.small }">
       <div class="keys" ref="keys">
         <div
@@ -12,11 +10,19 @@
           }`"
           @mousedown="keyMouseDown(key)"
           @mouseup="keyMouseUp(key)"
-          @mouseleave="keyMouseUp(key)"
+          @mouseenter="onMouseEnter(key, $event)"
+          @mouseleave="onMouseLeave(key, $event)"
           :style="
             key.active && key.color ? `background: ${key.color} !important` : ``
           "
-        ></div>
+        >
+          <div
+            class="keyboard-key"
+            v-if="getKeyboardKeyFromKey(key) && showKeyboardCaption"
+          >
+            {{ getKeyboardKeyFromKey(key) }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -25,11 +31,26 @@
 <script>
 import { Midi, Note } from "@tonaljs/tonal";
 import _ from "lodash";
-import interact from "interactjs";
 
 export default {
-  mounted() {},
+  components: {},
+  mounted() {
+    window.addEventListener("keydown", this.onKeyboardKeyDown);
+    window.addEventListener("keyup", this.onKeyboardKeyUp);
+  },
+  beforeUnmount() {
+    window.removeEventListener("keydown", this.onKeyboardKeyDown);
+    window.removeEventListener("keyup", this.onKeyboardKeyUp);
+  },
   props: {
+    showKeyboardCaption: {
+      type: Boolean,
+      default: false,
+    },
+    keyboardOctave: {
+      type: Number,
+      default: 3,
+    },
     small: {
       type: Boolean,
       default: false,
@@ -43,9 +64,61 @@ export default {
   computed: {},
 
   methods: {
+    getKeyboardKeyFromKey(key) {
+      const midiKeyCode = key.midi - this.keyboardOctave * 12;
+
+      for (const keycode in this.keyboardMidiMapping) {
+        if (Object.hasOwnProperty.call(this.keyboardMidiMapping, keycode)) {
+          const midicode = this.keyboardMidiMapping[keycode];
+
+          if (midicode == midiKeyCode) {
+            return String.fromCharCode(keycode);
+          }
+        }
+      }
+
+      return null;
+    },
+
+    getKeyFromKeyboardKeyCode(keycode) {
+      if (this.keyboardMidiMapping[keycode]) {
+        return this.keys[
+          this.keyboardMidiMapping[keycode] + this.keyboardOctave * 12
+        ];
+      }
+
+      return null;
+    },
+    onKeyboardKeyDown(e) {
+      const keycode = e.keyCode;
+      const key = this.getKeyFromKeyboardKeyCode(keycode);
+      if (key) {
+        this.pressKey(key.midi, 1);
+        this.emitKeyPressed(key);
+      }
+    },
+    onKeyboardKeyUp(e) {
+      const keycode = e.keyCode;
+      const key = this.getKeyFromKeyboardKeyCode(keycode);
+      if (key) {
+        this.releaseKey(key.midi);
+        this.emitKeyReleased(key);
+      }
+    },
+    onMouseEnter(key, event) {
+      if (event.buttons == 1) {
+        this.pressKey(key.midi, 1);
+        this.emitKeyPressed(key);
+      }
+    },
+    onMouseLeave(key, event) {
+      this.releaseKey(key.midi);
+      this.emitKeyReleased(key);
+    },
     getKeyFromMidi(midiKeyCode) {
       const key = this.keys[midiKeyCode];
-      return { name: key.name, midi: key.midi };
+
+      return key ? { name: key.name, midi: key.midi } : null;
     },
 
     startDragArea(e) {
@@ -74,7 +147,14 @@ export default {
         this.emitKeyReleased(key);
       }
     },
-
+    resetKeys() {
+      for (const midiCode in this.keys) {
+        if (Object.hasOwnProperty.call(this.keys, midiCode)) {
+          const key = this.keys[midiCode];
+          key.active = false;
+        }
+      }
+    },
     pressKey(midiKeyCode, color) {
       const key = this.keys[midiKeyCode];
       if (key) {
@@ -104,8 +184,30 @@ export default {
 
   data() {
     return {
-      startOctave: 0,
-      displayedOctaves: 9,
+      keyboardMidiMapping: {
+        81: 24, // C
+        90: 25, // C#
+        83: 26, // D
+        69: 27, // D#
+        68: 28, // E
+        70: 29, // F
+        84: 30, // F#
+        71: 31, // G
+        89: 32, // G#
+        72: 33, // A
+        85: 34, // A#
+        74: 35, // B
+        75: 36, // C2
+        79: 37, // C2#
+        76: 38, // D2
+        80: 39, // D2#
+        77: 40, // E2
+      },
+      keyboardKeys: [
+        {
+          keyCode: 65,
+        },
+      ],
       keys: this.buildKeys(21, 108),
     };
   },
@@ -115,11 +217,20 @@ export default {
 <style scoped lang="scss">
 .piano {
   position: relative;
-
+  .keyboard-key {
+    background-color: #2196f3;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 3px;
+    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 20px;
+  }
   &.small {
     .keys {
       .key {
         border-radius: 0 0 0 0;
+
         &.white-key {
           height: calc(200px / 4);
           width: calc(50px / 4);
@@ -148,6 +259,9 @@ export default {
   display: flex;
 
   .key {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
     color: black;
 
     &.C,
@@ -165,7 +279,7 @@ export default {
       z-index: 1;
       border-left: 1px solid #bbb;
       border-bottom: 1px solid #bbb;
-      border-radius: 0 0 5px 5px;
+      border-radius: 0 0 0 0;
       box-shadow: -1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 0 5px #ccc inset,
         0 0 3px rgba(0, 0, 0, 0.2);
       background: linear-gradient(to bottom, #eee 0%, #fff 100%);

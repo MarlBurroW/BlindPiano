@@ -43,6 +43,15 @@
           ></Avataaars>
         </v-badge>
       </v-layout>
+      <v-layout align-center justify-center>
+        <v-btn
+          v-if="me.id == player.id"
+          x-large
+          class="primary"
+          @click="spectator(player.spectator)"
+          >{{ player.spectator ? "Become a player" : "Become a spectator" }}
+        </v-btn>
+      </v-layout>
     </v-card-text>
   </v-card>
 </template>
@@ -72,6 +81,9 @@ export default {
     },
     promote(player) {
       this.$emit("promote", player);
+    },
+    spectator(player) {
+      this.$emit("spectator", !player.spectator);
     },
   },
 };

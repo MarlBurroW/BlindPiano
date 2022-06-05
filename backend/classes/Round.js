@@ -15,6 +15,8 @@ class Round {
 
       this.turns.push(new Turn(player));
     }
+
+    // this.shuffle();
   }
 
   isFinished() {
@@ -23,6 +25,10 @@ class Round {
 
   removeTurnByPlayerId(playerId) {
     this.turns = this.turns.filter((t) => playerId != t.player.id);
+  }
+
+  shuffle() {
+    this.turns = _.shuffle(this.turns);
   }
 
   toClientResource() {

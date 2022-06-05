@@ -7,7 +7,7 @@
       <v-divider class="mb-5"></v-divider>
 
       <v-card-text>
-        <Scores :players="scoreOrderedPlayers"></Scores>
+        <Scores></Scores>
       </v-card-text>
     </v-card>
   </div>

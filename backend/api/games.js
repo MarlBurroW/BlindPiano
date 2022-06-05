@@ -4,6 +4,25 @@ const app = require("../modules/app");
 const express = require("express");
 const router = express.Router();
 
+router.get("/games", (req, res) => {
+  res.send(
+    app.gameManager.games.map((g) => {
+      return {
+        id: g.id,
+        state: g.state.type,
+        player_count: g.players.length,
+        spectator_count: g.spectators.length,
+        persons: g.persons.map((p) => {
+          return {
+            nickname: p.nickname,
+            socketId: p.socket ? p.socket.id : null,
+          };
+        }),
+      };
+    })
+  );
+});
+
 router.post(
   "/games",
   checkSchema({
@@ -286,12 +305,12 @@ router.post(
       app.gameManager.addGame(game);
     }
 
-    const player = app.playerManager.createPlayer(username, req.body.avatar);
+    const person = app.personManager.createPerson(username, req.body.avatar);
 
-    game.addPlayer(player);
+    game.addPerson(person);
 
     res.send({
-      claimToken: player.claimToken,
+      claimToken: person.claimToken,
       gameId: game.id,
     });
   }
