@@ -1,6 +1,5 @@
 <template>
   <div class="pa-5">
-
     <v-card
       :style="{ borderColor: player.color, opacity: player.online ? 1 : 0.3 }"
       v-for="player in players"
@@ -20,10 +19,7 @@
         <div class="flex-grow-1">
           <v-card-text>
             <p class="text-h5 text--primary mb-0">
-              <v-icon
-                size="20"
-                color="warning"
-                v-if="player.leader"
+              <v-icon size="20" color="warning" v-if="player.leader"
                 >mdi-star</v-icon
               >{{ player.nickname }}
             </p>
@@ -70,33 +66,28 @@
 </template>
 
 <script>
-import contextMixin from "../mixins/context-mixin";
 import events from "../events";
 
 export default {
   mixins: [],
   props: {
-
     players: {
-      type: Array
+      type: Array,
     },
     me: {
-      type: Object
+      type: Object,
     },
     game: {
-      type: Object
-    }
-
+      type: Object,
+    },
   },
 
   computed: {
-
-      isLeader() {
-        return this.me.id == this.game.leaderId
-      }
+    isLeader() {
+      return this.me.id == this.game.leaderId;
+    },
   },
   methods: {
- 
     kick(player) {
       this.socket.emit(events.KICK_PLAYER, player.id);
     },

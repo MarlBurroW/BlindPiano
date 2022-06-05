@@ -1,11 +1,20 @@
 <template>
   <v-navigation-drawer v-model="leftDrawer" width="350" app clipped>
     <v-subheader>PLAYERS</v-subheader>
-    <player-list v-if="game"  :me="me" :game="game" :players="scoreOrderedPlayers"></player-list>
+    <player-list
+      v-if="game"
+      :me="me"
+      :game="game"
+      :players="game.players"
+    ></player-list>
     <v-subheader>SPECTATORS</v-subheader>
 
- 
-    <player-list v-if="game" :me="me" :game="game"  :players="spectators"></player-list>
+    <player-list
+      v-if="game"
+      :me="me"
+      :game="game"
+      :players="game.spectators"
+    ></player-list>
   </v-navigation-drawer>
 </template>
 
