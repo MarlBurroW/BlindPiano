@@ -73,6 +73,27 @@ class Game {
     return this.persons.filter((p) => p.spectator);
   }
 
+  reset() {
+    this.state = {
+      type: gameStates.WAITING_PLAYERS_SCREEN,
+    };
+    this.scores = {};
+    this.rounds = [];
+    this.currentRound = null;
+    this.playedSongs = [];
+    if (this.counterInterval) {
+      clearInterval(this.counterInterval);
+    }
+    this.counterInterval = null;
+    this.internalEventEmitter = new EventEmitter();
+    for (let i = 0; i < this.persons.length; i++) {
+      const person = this.persons[i];
+      person.spectator = false;
+    }
+
+    this.gameUpdate();
+  }
+
   setIO(io) {
     this.io = io;
   }
@@ -95,14 +116,6 @@ class Game {
     return this.persons.length;
   }
 
-  emptyCheck() {
-    if (this.playerCount() < 1) {
-      this.state = {
-        type: gameStates.FINISHED,
-      };
-    }
-  }
-
   getAvailableColor() {
     const alreadyUsedColors = this.persons
       .filter((p) => p.color)
@@ -115,7 +128,7 @@ class Game {
     this.persons.push(person);
     person.setColor(_.sample(this.getAvailableColor()));
     this.electNewLeaderIfNeeded();
-    // this.emptyCheck();
+
     this.gameUpdate();
 
     this.log(`${person.nickname} has joined the game`);
@@ -173,7 +186,7 @@ class Game {
     if (person) {
       _.remove(this.persons, (p) => p.id === person.id);
       this.electNewLeaderIfNeeded();
-      // this.emptyCheck();
+
       this.removeTurnsByPlayerId(person.id);
 
       const turn = this.getCurrentTurn();
@@ -181,7 +194,14 @@ class Game {
       if (turn && turn.player.id == person.id) {
         turn.finish();
         clearInterval(this.counterInterval);
+      }
 
+      if (this.players.length < 2) {
+        this.setState({
+          type: gameStates.FINAL_SCREEN,
+        });
+        this.log(`Not enough player to finish the game`);
+      } else {
         const nextTurn = this.getCurrentTurn();
         this.startTurn(nextTurn);
       }
@@ -643,6 +663,15 @@ class Game {
     if (this.state.type === gameStates.PLAY_SONG_SCREEN) {
       const turn = this.getCurrentTurn();
 
+      if (player.spectator) {
+        this.log(
+          "You are not allowed to talk when you are spectator",
+          player,
+          "red"
+        );
+        return;
+      }
+
       if (turn.player.id === player.id) {
         this.log(
           "You are not allowed to talk when it's your turn",
@@ -747,7 +776,6 @@ class Game {
       state: this.state,
       leaderId: this.leaderId,
       persons: this.persons.map((p) => p.toClientResource()),
-
       scores: this.scores,
       roundCount: this.roundCount,
       progress: this.getGameStructure(),

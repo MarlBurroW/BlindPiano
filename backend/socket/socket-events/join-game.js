@@ -44,6 +44,11 @@ module.exports = (gameContext) => {
     console.log(`Make socket ${socket.id} joining the room ${game.id}`);
     socket.join(game.id);
 
+    if (game.state.type != gameStates.WAITING_PLAYERS_SCREEN) {
+      console.log(`Game already started, set ${me.nickname} as spectator`);
+      me.spectator = true;
+    }
+
     socket.emit(events.GAME_JOINED, {
       me: me.toClientResource(),
       game: game.toClientResource(),

@@ -14,6 +14,7 @@ import VuePlyr from "vue-plyr";
 import "vue-plyr/dist/vue-plyr.css";
 
 import ordinal from "ordinal";
+import Game from "../classes/Game";
 
 export default async (app, inject) => {
   Vue.component(Avataaars);
@@ -70,4 +71,6 @@ export default async (app, inject) => {
   Vue.use(VueClipboard);
 
   inject("ordinal", ordinal);
+
+  let game = null;
 };

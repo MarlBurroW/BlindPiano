@@ -7,7 +7,13 @@
       <v-divider class="mb-5"></v-divider>
 
       <v-card-text>
-        <Scores></Scores>
+        <Scores :players="game.scoreOrderedPlayers"></Scores>
+      </v-card-text>
+
+      <v-card-text v-if="game.isLeader(me)" class="d-flex justify-center">
+        <v-btn x-large @click="game.restartGame()" color="primary"
+          >Start a new game</v-btn
+        >
       </v-card-text>
     </v-card>
   </div>

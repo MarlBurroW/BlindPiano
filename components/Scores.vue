@@ -2,7 +2,7 @@
   <v-simple-table>
     <template v-slot:default>
       <tbody>
-        <tr v-for="(player, rank) in scoreOrderedPlayers" :key="player.id">
+        <tr v-for="(player, rank) in players" :key="player.id">
           <td
             width="50"
             class="rank"
@@ -23,7 +23,8 @@
           </td>
 
           <td class="score">
-            <span>{{ getPlayerScore(player.id) }}</span>
+            <span :style="{ color: player.color }">{{ player.score }}</span>
+            {{ player.score > 0 ? "Points" : "Point" }}
           </td>
         </tr>
       </tbody>
@@ -32,12 +33,12 @@
 </template>
 
 <script>
-import contextMixin from "../mixins/context-mixin";
-import events from "../events";
-
 export default {
-  mixins: [contextMixin],
-  props: {},
+  props: {
+    players: {
+      type: Array,
+    },
+  },
 };
 </script>
 
@@ -52,6 +53,8 @@ export default {
 }
 
 .score {
+  min-width: 300px;
+  text-align: right;
   span {
     font-size: 30px;
     font-weight: bold;

@@ -65,7 +65,7 @@
       color="grey darken-4"
       app
       padless
-      v-if="game && socket"
+      v-if="game && socket && me && game.isPlayer(me)"
       class="d-flex justify-center footer"
     >
       <Keyboard :volume.sync="volume" :event-bus="keyboardEventBus"></Keyboard>
@@ -111,8 +111,8 @@ export default {
       this.$notyf.error(err.message);
     });
 
-    this.socket.on(events.GAME_UPDATED, (game) => {
-      this.game = game;
+    this.socket.on(events.GAME_UPDATED, (gameData) => {
+      this.gameData = gameData;
     });
 
     this.socket.on(events.MESSAGE, (payload) => {
@@ -125,7 +125,8 @@ export default {
 
     this.socket.on(events.GAME_JOINED, ({ me, game }) => {
       this.me = me;
-      this.game = game;
+      this.gameData = game;
+      this.game.setSocket(this.socket);
       this.joinDialog = false;
       this.$playSFX("new-player");
       this.startDevice();
@@ -175,9 +176,7 @@ export default {
     });
 
     this.socket.on(events.UPDATE_COUNTDOWN, (countDown) => {
-      if (this.game && this.game.state && this.game.state.countDown) {
-        this.game.state.countDown = countDown;
-      }
+      this.countDown = countDown;
     });
 
     this.socket.on(events.KEY_PRESSED, (payload) => {

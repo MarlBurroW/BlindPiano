@@ -5,10 +5,8 @@ module.exports = (gameContext) => {
     const game = gameContext.getGame();
     const me = gameContext.getMe();
 
-    if (me && game && game.state.type == gameStates.WAITING_PLAYERS_SCREEN) {
-      me.spectator = !me.spectator;
-
-      game.gameUpdate();
+    if (me && game && game.state.type == gameStates.FINAL_SCREEN) {
+      game.reset();
     }
   };
 };

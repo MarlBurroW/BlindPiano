@@ -5,21 +5,20 @@
         <h1>Current Score</h1>
       </v-card-title>
       <v-card-text class="mb-5">
-        <Scores></Scores>
+        <Scores :players="game.scoreOrderedPlayers"></Scores>
       </v-card-text>
 
-      <v-card-text
-        v-if="currentTurnPlayer.id == me.id"
-        class="d-flex justify-center"
-      >
-        <v-btn x-large @click="startTurn" color="primary">Start my turn</v-btn>
+      <v-card-text v-if="game.isTurnOf(me)" class="d-flex justify-center">
+        <v-btn x-large @click="game.startTurn()" color="primary"
+          >Start my turn</v-btn
+        >
       </v-card-text>
 
       <v-card-text v-else class="d-flex justify-center">
         <div class="next-player-info">
           The next turn is for
-          <span :style="{ color: currentTurnPlayer.color }">{{
-            currentTurnPlayer.nickname
+          <span :style="{ color: game.turnPlayer.color }">{{
+            game.turnPlayer.nickname
           }}</span>
         </div>
       </v-card-text>
@@ -29,17 +28,9 @@
 
 <script>
 import contextMixin from "../mixins/context-mixin";
-import events from "../events";
+
 export default {
   mixins: [contextMixin],
-  props: {},
-  beforeUnmount() {},
-  mounted() {},
-  methods: {
-    startTurn() {
-      this.socket.emit(events.START_TURN);
-    },
-  },
   computed: {},
 };
 </script>

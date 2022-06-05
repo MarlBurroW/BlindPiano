@@ -172,20 +172,22 @@ export default {
 
     this.eventBus.on("key-pressed", (payload) => {
       const visibility = this.getLocalPlayerSetting(payload.from, "visibility");
-      if (visibility) {
+      if (visibility && this.$refs.piano) {
         this.$refs.piano.pressKey(payload.key.midi, payload.color);
       }
     });
 
     this.eventBus.on("key-released", (payload) => {
       const visibility = this.getLocalPlayerSetting(payload.from, "visibility");
-      if (visibility) {
+      if (visibility && this.$refs.piano) {
         this.$refs.piano.releaseKey(payload.key.midi);
       }
     });
 
     this.eventBus.on("reset", () => {
-      this.$refs.piano.resetKeys();
+      if (this.$refs.piano) {
+        this.$refs.piano.resetKeys();
+      }
     });
   },
   computed: {},

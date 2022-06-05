@@ -64,7 +64,7 @@ export default {
           avatar: this.avatar,
         })
         .then((res) => {
-          this.game = res.data.game;
+          this.gameData = res.data.game;
           this.claimToken = res.data.claimToken;
 
           this.$emit("user-created", this.claimToken);

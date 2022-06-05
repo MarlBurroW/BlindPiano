@@ -1,10 +1,9 @@
 import Vue from "vue";
 import Game from "../classes/Game";
-
 export const state = () => ({
   claimToken: null,
   gameId: null,
-  game: null,
+  gameData: null,
   me: null,
   privateTurnInfo: null,
   socket: null,
@@ -41,11 +40,16 @@ export const mutations = {
   storeMe(state, me) {
     state.me = me;
   },
-  storeGame(state, game) {
-    if (game) {
-      state.game = new Game(game);
-      for (let i = 0; i < state.game.players.length; i++) {
-        const player = state.game.players[i];
+  storeGameData(state, gameData) {
+    state.gameData = gameData;
+
+    if (gameData) {
+      for (let i = 0; i < state.gameData.persons.length; i++) {
+        const player = state.gameData.persons[i];
+
+        if (player.id === state.me.id) {
+          state.me = player;
+        }
 
         if (!state.localPlayersSettings[player.id]) {
           Vue.set(state.localPlayersSettings, player.id, {
@@ -59,6 +63,10 @@ export const mutations = {
   },
   storeGameId(state, gameId) {
     state.gameId = gameId;
+  },
+
+  storeCountDown(state, countDown) {
+    state.gameData.state.countDown = countDown;
   },
 
   addChatMessage(state, message) {
@@ -90,4 +98,22 @@ export const mutations = {
     state.localPlayersSettings[playerId][prop] = value;
   },
 };
+
+let game = null;
+
+export const getters = {
+  gameInstance(state) {
+    if (!game) {
+      if (state.gameData) {
+        game = new Game(state.gameData);
+      }
+    } else {
+      if (state.gameData) {
+        game.setGameData(state.gameData);
+      }
+    }
+    return game;
+  },
+};
+
 export const strict = false;

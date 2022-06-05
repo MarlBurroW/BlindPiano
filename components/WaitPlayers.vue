@@ -5,18 +5,20 @@
         <h1>Waiting for players</h1>
         <v-spacer></v-spacer>
 
-        <v-btn @click="optionDialog = !optionDialog" x-large class="mr-2"
-          ><v-icon left>mdi-cog</v-icon> Options
-        </v-btn>
-
+        <v-btn color="primary" @click="spectator" x-large class="mr-2">
+          {{ me.spectator ? "Become a player" : "Become a spectator" }}
+          <v-icon right>{{
+            me.spectator ? "mdi-controller-classic" : "mdi-eye"
+          }}</v-icon></v-btn
+        >
         <v-btn
           x-large
-          v-if="isLeader"
+          v-if="game.isLeader(me)"
           :disabled="game.players.length < 2"
           class="primary"
           @click="startGame"
         >
-          Start Game
+          Start Game <v-icon right>mdi-send</v-icon>
         </v-btn>
       </v-card-title>
       <v-divider class="mb-5"></v-divider>
@@ -34,105 +36,98 @@
       </v-card-text>
 
       <v-card-text>
-        <v-btn @click="spectator">Spectate</v-btn>
+        <h2 class="mb-5">Game options</h2>
+
+        <v-row>
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.roundCount"
+              @change="updateOptions"
+              :items="roundCountItems"
+              :disabled="!game.isLeader(me)"
+              label="Number of round(s)"
+              outlined
+            ></v-select>
+          </v-col>
+
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.learnTime"
+              @change="updateOptions"
+              :items="learningDurationItems"
+              :disabled="!game.isLeader(me)"
+              label="Learning song duration"
+              outlined
+            ></v-select>
+          </v-col>
+
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.playTime"
+              @change="updateOptions"
+              :items="playTimeItems"
+              :disabled="!game.isLeader(me)"
+              label="Play/Guess song duration"
+              outlined
+            ></v-select>
+          </v-col>
+
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.chooseTime"
+              @change="updateOptions"
+              :items="chooseTimeItems"
+              :disabled="!game.isLeader(me)"
+              label="Choosing song duration"
+              outlined
+            ></v-select>
+          </v-col>
+
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.chooseCount"
+              @change="updateOptions"
+              :items="chooseCountItems"
+              :disabled="!game.isLeader(me)"
+              label="Song choices"
+              outlined
+            ></v-select>
+          </v-col>
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.guessArtistPoints"
+              @change="updateOptions"
+              :items="guessArtistPointsItems"
+              :disabled="!game.isLeader(me)"
+              label="Points a player earn when he guess the artist"
+              outlined
+            ></v-select>
+          </v-col>
+
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.guessSongPoints"
+              @change="updateOptions"
+              :items="guessSongPointsItems"
+              :disabled="!game.isLeader(me)"
+              label="Points a player earn when he guess the song"
+              outlined
+            ></v-select>
+          </v-col>
+
+          <v-col xl="4" md="6" sm="12">
+            <v-select
+              v-model="gameOptions.someoneGuessMyPlayPoints"
+              @change="updateOptions"
+              :items="someoneGuessMyPlayPointsItems"
+              :disabled="!game.isLeader(me)"
+              label="Points a player earn when another player guess his song/artist"
+              outlined
+            ></v-select>
+          </v-col>
+        </v-row>
       </v-card-text>
     </v-card>
-
-    <v-dialog v-model="optionDialog" width="500">
-      <v-card>
-        <v-toolbar>
-          <v-toolbar-title
-            ><v-icon>mdi-cog</v-icon> Game Options
-          </v-toolbar-title>
-          <v-spacer></v-spacer>
-
-          <v-btn icon @click="optionDialog = false"
-            ><v-icon>mdi-close</v-icon></v-btn
-          >
-        </v-toolbar>
-
-        <v-card-text class="px-5 py-5" v-if="gameOptions">
-          <v-select
-            v-model="gameOptions.roundCount"
-            @change="updateOptions"
-            :items="roundCountItems"
-            :disabled="!isLeader"
-            label="Number of round(s)"
-            outlined
-          ></v-select>
-
-          <v-select
-            v-model="gameOptions.learnTime"
-            @change="updateOptions"
-            :items="learningDurationItems"
-            :disabled="!isLeader"
-            label="Learning song duration"
-            outlined
-          ></v-select>
-
-          <v-select
-            v-model="gameOptions.playTime"
-            @change="updateOptions"
-            :items="playTimeItems"
-            :disabled="!isLeader"
-            label="Play/Guess song duration"
-            outlined
-          ></v-select>
-
-          <v-select
-            v-model="gameOptions.chooseTime"
-            @change="updateOptions"
-            :items="chooseTimeItems"
-            :disabled="!isLeader"
-            label="Choosing song duration"
-            outlined
-          ></v-select>
-
-          <v-select
-            v-model="gameOptions.chooseCount"
-            @change="updateOptions"
-            :items="chooseCountItems"
-            :disabled="!isLeader"
-            label="Song choices"
-            outlined
-          ></v-select>
-
-          <v-select
-            v-model="gameOptions.guessArtistPoints"
-            @change="updateOptions"
-            :items="guessArtistPointsItems"
-            :disabled="!isLeader"
-            label="Points a player earn when he guess the artist"
-            outlined
-          ></v-select>
-
-          <v-select
-            v-model="gameOptions.guessSongPoints"
-            @change="updateOptions"
-            :items="guessSongPointsItems"
-            :disabled="!isLeader"
-            label="Points a player earn when he guess the song"
-            outlined
-          ></v-select>
-
-          <v-select
-            v-model="gameOptions.someoneGuessMyPlayPoints"
-            @change="updateOptions"
-            :items="someoneGuessMyPlayPointsItems"
-            :disabled="!isLeader"
-            label="Points a player earn when another player guess his song/artist"
-            outlined
-          ></v-select>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text @click="optionDialog = false"> Close </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 

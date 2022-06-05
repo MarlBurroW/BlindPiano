@@ -15,11 +15,16 @@ export default {
       },
     },
     game: {
-      set(game) {
-        this.$store.commit("storeGame", game);
+      get() {
+        return this.$store.getters.gameInstance;
+      },
+    },
+    gameData: {
+      set(gameData) {
+        this.$store.commit("storeGameData", gameData);
       },
       get() {
-        return this.$store.state.game;
+        return this.$store.state.gameData;
       },
     },
     masterVolume: {
@@ -38,6 +43,15 @@ export default {
         return this.$store.state.privateTurnInfo;
       },
     },
+    countDown: {
+      set(countDown) {
+        this.$store.commit("storeCountDown", countDown);
+      },
+      get() {
+        return this.gameData.state.countDown;
+      },
+    },
+
     claimToken: {
       set(claimToken) {
         this.$store.commit("storeClaimToken", claimToken);
@@ -128,11 +142,6 @@ export default {
         this.game.state.turn &&
         this.game.state.turn.playerId == this.me.id
       );
-    },
-    countDown() {
-      return this.game && this.game.state && this.game.state.countDown
-        ? this.game.state.countDown
-        : null;
     },
 
     localPlayersSettings() {

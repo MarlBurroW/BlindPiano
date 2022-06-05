@@ -1,24 +1,26 @@
 <template>
   <div class="d-flex justify-center flex-column align-center fill-height">
     <div
-      v-if="player"
+      v-if="game.turnPlayer"
       class="d-flex flex-column justify-center align-center mb-10"
     >
       <Avataaars
-        :avatar-options="player.avatar"
+        :avatar-options="game.turnPlayer.avatar"
         :height="250"
         :width="250"
         class="mb-5"
       ></Avataaars>
 
       <div class="message">
-        <span :style="{ color: player.color }">{{ player.nickname }}</span> is
-        playing! Guess the song by typing its name and/or the artist name in the
-        chat.
+        <span :style="{ color: game.turnPlayer.color }">{{
+          game.turnPlayer.nickname
+        }}</span>
+        is playing! Guess the song by typing its name and/or the artist name in
+        the chat.
       </div>
 
       <div class="countdown">
-        {{ $formatSeconds(this.game.state.countDown) }}
+        {{ $formatSeconds(game.countDown) }}
       </div>
     </div>
 
@@ -37,36 +39,30 @@
               player.nickname
             }}</span>
 
-            <div class="score">{{ getPlayerScore(player.id) }} point(s)</div>
+            <div class="score">{{ player.score }} point(s)</div>
           </v-card-text>
 
           <v-divider></v-divider>
           <v-card-actions class="justify-center">
             <v-chip
               class="mx-2"
-              :color="getPlayerArtistGuessState(player.id) ? 'success' : ''"
+              :color="player.hasGuessedArtist ? 'success' : ''"
             >
               Artist
 
               <v-icon right>
-                {{
-                  getPlayerArtistGuessState(player.id)
-                    ? "mdi-check"
-                    : "mdi-close"
-                }}
+                {{ player.hasGuessedArtist ? "mdi-check" : "mdi-close" }}
               </v-icon>
             </v-chip>
 
             <v-chip
               class="mx-2"
-              :color="getPlayerSongGuessState(player.id) ? 'success' : ''"
+              :color="player.hasGuessedSong ? 'success' : ''"
             >
               Song
 
               <v-icon right>
-                {{
-                  getPlayerSongGuessState(player.id) ? "mdi-check" : "mdi-close"
-                }}
+                {{ player.hasGuessedSong ? "mdi-check" : "mdi-close" }}
               </v-icon>
             </v-chip>
           </v-card-actions>
@@ -87,16 +83,7 @@ export default {
 
   computed: {
     guessers() {
-      return this.game.players.filter((p) => p.id !== this.player.id);
-    },
-
-    player() {
-      return this.game.players.find(
-        (p) => p.id === this.game.state.turn.playerId
-      );
-    },
-    turn() {
-      return this.game.state.turn;
+      return this.game.players.filter((p) => p.id !== this.game.turnPlayer.id);
     },
   },
 };

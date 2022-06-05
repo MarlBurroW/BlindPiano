@@ -24,19 +24,19 @@
               >{{ player.nickname }}
             </p>
 
-            <!-- <div class="mt-3">
+            <div class="mt-3" v-if="!player.spectator">
               <strong
                 style="font-size: 25px"
                 :style="{ color: player.color }"
-                >{{ getPlayerScore(player.id) }}</strong
+                >{{ player.score }}</strong
               >
               points
-            </div> -->
+            </div>
           </v-card-text>
         </div>
 
         <div class="d-flex flex-column justify-center align-end">
-          <v-menu left bottom v-if="isLeader && player.id !== me.id">
+          <v-menu left bottom v-if="game.isLeader(me) && player.id !== me.id">
             <template v-slot:activator="{ on, attrs }">
               <v-btn icon v-bind="attrs" v-on="on">
                 <v-icon>mdi-dots-vertical</v-icon>
@@ -45,15 +45,15 @@
 
             <v-list>
               <v-list-item
-                v-if="isLeader && player.id !== me.id"
-                @click="kick(player)"
+                v-if="game.isLeader(me) && player.id !== me.id"
+                @click="game.kick(player)"
               >
                 <v-list-item-title>Kick </v-list-item-title>
               </v-list-item>
 
               <v-list-item
-                v-if="isLeader && player.id !== me.id"
-                @click="promote(player)"
+                v-if="game.isLeader(me) && player.id !== me.id"
+                @click="game.promote(player)"
               >
                 <v-list-item-title>Promote</v-list-item-title>
               </v-list-item>
@@ -82,19 +82,7 @@ export default {
     },
   },
 
-  computed: {
-    isLeader() {
-      return this.me.id == this.game.leaderId;
-    },
-  },
-  methods: {
-    kick(player) {
-      this.socket.emit(events.KICK_PLAYER, player.id);
-    },
-    promote(player) {
-      this.socket.emit(events.PROMOTE, player.id);
-    },
-  },
+  methods: {},
 };
 </script>
 

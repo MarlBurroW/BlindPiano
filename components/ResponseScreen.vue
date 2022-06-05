@@ -5,7 +5,7 @@
         <h1>The song was</h1>
       </v-card-title>
       <v-card-text class="mb-5">
-        <song-card autoplay :song="game.state.turn.song"></song-card>
+        <song-card autoplay :song="game.song"></song-card>
       </v-card-text>
     </v-card>
   </div>
@@ -13,7 +13,7 @@
 
 <script>
 import contextMixin from "../mixins/context-mixin";
-import events from "../events";
+
 export default {
   mixins: [contextMixin],
   props: {},

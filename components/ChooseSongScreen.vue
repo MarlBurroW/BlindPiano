@@ -1,6 +1,6 @@
 <template>
   <div class="fill-height">
-    <div v-if="turnInfo && isMyTurn">
+    <div v-if="turnInfo && game.isTurnOf(me)">
       <v-card fill-height class="fill-height pa-10">
         <v-card-title class="mb-5 justify-center">
           <h1>Choose your song ({{ $formatSeconds(game.countDown) }})</h1>
@@ -10,7 +10,7 @@
             <v-col v-for="song in turnInfo.proposedSongs" :key="song.id">
               <song-card :song="song">
                 <v-card-text class="d-flex justify-center">
-                  <v-btn @click="choose(song)" x-large color="primary"
+                  <v-btn @click="game.chooseSong(song)" x-large color="primary"
                     >Select</v-btn
                   >
                 </v-card-text>
@@ -25,19 +25,21 @@
       class="d-flex justify-center flex-column align-center fill-height mb-5"
     >
       <Avataaars
-        :avatar-options="player.avatar"
+        :avatar-options="game.turnPlayer.avatar"
         :height="250"
         :width="250"
         class="mb-5"
       ></Avataaars>
 
       <div class="turn-info text-sm-center">
-        <span :style="{ color: player.color }">{{ player.nickname }}</span>
+        <span :style="{ color: game.turnPlayer.color }">{{
+          game.turnPlayer.nickname
+        }}</span>
         is choosing a song...
       </div>
 
       <div class="countdown">
-        {{ $formatSeconds(this.game.countDown) }}
+        {{ $formatSeconds(game.countDown) }}
       </div>
     </div>
   </div>
@@ -51,16 +53,8 @@ export default {
   props: {},
   beforeUnmount() {},
   mounted() {},
-  methods: {
-    choose(song) {
-      this.socket.emit(events.CHOOSE_SONG, song.id);
-    },
-  },
-  computed: {
-    player() {
-      return this.game.turnPlayer;
-    },
-  },
+
+  computed: {},
 };
 </script>
 
