@@ -13,6 +13,7 @@ class Piano {
     }
 
     this.instrument = new tonjejsPiano({
+      url: "/samples/piano",
       velocities: 5,
       volume: {
         pedal: -20,
