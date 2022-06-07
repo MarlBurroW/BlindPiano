@@ -1,17 +1,23 @@
-import u from "v-drag";
 import PolySynth from "./Polysynth";
+import Piano from "./Piano";
+import ElectricBass from "./ElectricBass";
+import ElectricGuitar from "./ElectricGuitar";
+import HighQualityPiano from "./HighQualityPiano";
+import Violin from "./Violin";
+import Saxophone from "./Saxophone";
+import Trumpet from "./Trumpet";
+import AcousticGuitar from "./AcousticGuitar";
 
 const list = [
-  {
-    name: "Classic Piano",
-    id: "piano",
-    presets: [],
-  },
-  {
-    name: "PolySynth",
-    id: "polysynth",
-    presets: PolySynth.getPresets(),
-  },
+  Piano,
+  ElectricBass,
+  ElectricGuitar,
+  AcousticGuitar,
+  Violin,
+  Saxophone,
+  Trumpet,
+
+  HighQualityPiano,
 ];
 
 export default list;
@@ -23,7 +29,7 @@ export function getInstrumentById(id) {
 export function getInstrumentNameById(id) {
   const instrument = getInstrumentById(id);
   if (instrument) {
-    return instrument.name;
+    return instrument.label;
   } else {
     return null;
   }
@@ -43,7 +49,7 @@ export function getPresetNameById(instrumentId, presetId) {
   if (instrument && instrument.presets) {
     const preset = getPresetById(instrument.id, presetId);
     if (preset) {
-      return preset.name;
+      return preset.label;
     }
   }
   return null;

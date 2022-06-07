@@ -1,8 +1,8 @@
-import TonePiano from "tonejs-instrument-piano-wav";
+import ToneElectricBass from "tonejs-instrument-bass-electric-wav";
 import BaseInstrument from "./BaseInstrument";
-class Piano extends BaseInstrument {
-  static id = "piano";
-  static label = "🎹 Piano";
+class ElectricBass extends BaseInstrument {
+  static id = "electric-bass";
+  static label = "🎸 Electric Bass";
 
   constructor() {
     super();
@@ -10,10 +10,9 @@ class Piano extends BaseInstrument {
 
   load() {
     return new Promise((resolve, reject) => {
-      this.instrument = new TonePiano({
+      this.instrument = new ToneElectricBass({
         onload: () => {
           this.loaded = true;
-
           resolve(this.instrument);
         },
       });
@@ -21,4 +20,4 @@ class Piano extends BaseInstrument {
   }
 }
 
-export default Piano;
+export default ElectricBass;

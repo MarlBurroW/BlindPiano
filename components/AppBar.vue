@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app clipped-left clipped-right>
+  <v-app-bar app clipped-left clipped-right class="transparent-background-5">
     <v-btn icon @click="leftDrawer = !leftDrawer"
       ><v-icon>mdi-dock-left</v-icon></v-btn
     >

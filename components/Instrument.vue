@@ -1,8 +1,7 @@
 <template></template>
 
 <script>
-import Piano from "../instruments/Piano";
-import PolySynth from "../instruments/Polysynth";
+import instrumentList from "../instruments/list";
 import * as Tone from "tone";
 
 export default {
@@ -32,19 +31,18 @@ export default {
       required: true,
     },
   },
-  created() {
-    const piano = new Piano();
-    piano.setVolumeNode(this.volumeNode);
 
-    const polysynth = new PolySynth();
-    polysynth.setVolumeNode(this.volumeNode);
-
-    this.instruments = {
-      piano,
-      polysynth,
-    };
-  },
   mounted() {
+    const instruments = {};
+    for (let i = 0; i < instrumentList.length; i++) {
+      const InstrumentClass = instrumentList[i];
+      const instrumentInstance = new InstrumentClass();
+
+      instruments[InstrumentClass.id] = instrumentInstance;
+    }
+
+    this.instruments = instruments;
+
     this.eventBus.on("key-pressed", this.onKeyPressed);
     this.eventBus.on("key-released", this.onKeyReleased);
     this.eventBus.on("hold-pedal", this.onHoldPedal);
@@ -60,12 +58,24 @@ export default {
     for (const key in this.instruments) {
       if (Object.hasOwnProperty.call(this.instruments, key)) {
         const instrument = this.instruments[key];
+
         instrument.destroy();
       }
     }
   },
 
   watch: {
+    currentInstrument: {
+      immediate: true,
+      handler(instrument) {
+        if (instrument && !instrument.isLoaded()) {
+          instrument.load().then(() => {
+            instrument.connect(this.volumeNode);
+          });
+        }
+      },
+    },
+
     volume: {
       immediate: true,
       handler(db) {
@@ -83,7 +93,9 @@ export default {
   },
   computed: {
     currentInstrument() {
-      return this.instruments[this.instrument];
+      if (this.instruments) {
+        return this.instruments[this.instrument];
+      }
     },
 
     volumeDb: {

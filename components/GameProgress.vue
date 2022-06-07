@@ -1,6 +1,9 @@
 <template>
   <div>
-    <v-toolbar v-if="game && game.progress" class="d-flex justify-center">
+    <v-toolbar
+      v-if="game && game.progress"
+      class="d-flex justify-center transparent-background-3"
+    >
       <div :key="round.number" v-for="(round, i) in game.progress">
         <v-chip
           class="ma-2"

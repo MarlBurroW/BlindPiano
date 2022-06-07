@@ -1,5 +1,5 @@
 <template>
-  <v-card class="keyboard" flat color="grey  darken-4">
+  <v-card class="keyboard transparent-background-5" flat>
     <div class="d-flex keyboard-control align-center">
       <div class="control d-flex align-center">
         <v-switch

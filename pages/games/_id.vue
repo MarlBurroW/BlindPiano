@@ -62,11 +62,10 @@
     ></JoinGameDialog>
 
     <v-footer
-      color="grey darken-4"
       app
       padless
       v-if="game && socket && me && game.isPlayer(me)"
-      class="d-flex justify-center footer"
+      class="d-flex justify-center footer transparent-background-0"
     >
       <Keyboard :volume.sync="volume" :event-bus="keyboardEventBus"></Keyboard>
     </v-footer>

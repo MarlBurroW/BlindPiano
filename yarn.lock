@@ -9796,6 +9796,55 @@ tone@^14.8.38:
     standardized-audio-context "^25.3.16"
     tslib "^2.3.1"
 
+tonejs-instrument-bass-electric-wav@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-bass-electric-wav/-/tonejs-instrument-bass-electric-wav-1.1.2.tgz#a1833064324db0206e89c4217664600e3c580733"
+  integrity sha512-fMhttx2LsN8DZW8Y3mKnERW8/f6d2zRPUpHqwI9qe9ij27s931fX10aBTV+G6NmuTYzhoLk4BA16eqzL62rR9g==
+
+tonejs-instrument-guitar-acoustic-wav@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-guitar-acoustic-wav/-/tonejs-instrument-guitar-acoustic-wav-1.1.0.tgz#e3045ae9672b4394f37898d38dd90394884b0dd5"
+  integrity sha512-cDzPrteWeimqVfe4oCnhwjeM+b5xHdmEIUfE5Uq/rD8gf/VpN6WObwhwjbWDezHCGPN+sfSDpqHsQLE7ZqhuoA==
+
+tonejs-instrument-guitar-electric-wav@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-guitar-electric-wav/-/tonejs-instrument-guitar-electric-wav-1.1.0.tgz#52cd9c5866c5af19bf7cda5fe599e8e5252adfe2"
+  integrity sha512-80CGgxo/+vhSKcUm9W5Mrz9wmVOzoN5Ktdj112ctBddVb1HpwJVggX7kblpiUfhWBTAKRkXatvm6zTPa4U+UuQ==
+
+tonejs-instrument-piano-mp3@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-piano-mp3/-/tonejs-instrument-piano-mp3-1.1.2.tgz#3f4072fde6be8790ed16802411cebc6f037de346"
+  integrity sha512-5h67cOKqC4XeS13szLcf275SEKLjxcybQiVZwvJjeDsc/44srxIkiSEPv7KqvGltX/uPoTmyAfwMS284nDxjKQ==
+
+tonejs-instrument-piano-ogg@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-piano-ogg/-/tonejs-instrument-piano-ogg-1.1.0.tgz#f4aea4250e192f1f766b2d7b0d1cd89c2d1b79b8"
+  integrity sha512-3p13ZEjvmUsczc1W1KMiWO6EK7VfsWQPo/kNxHTptwMDVb/fisz0g3zF5kXkvqJ/IH65sXWfAbW2ynhn3JXKhg==
+
+tonejs-instrument-piano-wav@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-piano-wav/-/tonejs-instrument-piano-wav-1.1.0.tgz#a861ab254234e5a977440aee73cfe86b544fd918"
+  integrity sha512-h91UWQazzYPvrle2RO2ZBdExzjyArHqknvj9eaSGMMSw+2tGzLr1J6HqNW8QywOxfHqXyfjNyyMb2ChqmKqZhA==
+
+tonejs-instrument-saxophone-wav@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-saxophone-wav/-/tonejs-instrument-saxophone-wav-1.1.0.tgz#9d28ab15208a0a3c7ff1c7577a71c5bcb4bfc6db"
+  integrity sha512-5Z+Twxs5x85uqerp5bnxhlsu0Oz48CA5Dc/u0mEvhxp3QujHK4Bjd4e6vG4Ygml8W0k+wRyRaHhQcDm06sdOkA==
+
+tonejs-instrument-trumpet-wav@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-trumpet-wav/-/tonejs-instrument-trumpet-wav-1.1.0.tgz#79ac0cfd5c2c53991f87bc8ec1ee2e7583883c3d"
+  integrity sha512-W/MfFGbMp0v/JBM4gYh4VChGnBKMh/3nifbC/yQTn0uqQUVcE/5u31NZxKNd0pNKcqwcXoUQrjsg8hovFSYIZw==
+
+tonejs-instrument-violin-wav@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/tonejs-instrument-violin-wav/-/tonejs-instrument-violin-wav-1.1.0.tgz#e76896e2fa5a4c7871efc7031369c6e6e535b791"
+  integrity sha512-Og86yRPVUNyR2UQ9ErqCNCRJnnFduFeQB7RSdUHZfB0NgCVtVulV+SXOYQ93OYPRMGtzn8YEcTBA2pel+JdQgg==
+
+tonejs-instruments@Makefully-Studios/tonejs-instruments:
+  version "1.1.0"
+  resolved "https://codeload.github.com/Makefully-Studios/tonejs-instruments/tar.gz/07f67002eb378a8ac54ce114b4863e23ee879194"
+
 toposort-class@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/toposort-class/-/toposort-class-1.0.1.tgz#7ffd1f78c8be28c3ba45cd4e1a3f5ee193bd9988"

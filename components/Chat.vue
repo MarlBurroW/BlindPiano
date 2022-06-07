@@ -1,5 +1,5 @@
 <template>
-  <v-card flat class="d-flex flex-column fill-height">
+  <v-card flat class="d-flex flex-column fill-height chat-card">
     <!-- <v-toolbar dense class="shrink">
       <v-spacer></v-spacer>
 
@@ -124,5 +124,9 @@ export default {
   .nickname {
     font-weight: bold;
   }
+}
+
+.chat-card {
+  background-color: transparent;
 }
 </style>

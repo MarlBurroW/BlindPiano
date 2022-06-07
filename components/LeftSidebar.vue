@@ -1,5 +1,11 @@
 <template>
-  <v-navigation-drawer v-model="leftDrawer" width="350" app clipped>
+  <v-navigation-drawer
+    class="transparent-background-3"
+    v-model="leftDrawer"
+    width="350"
+    app
+    clipped
+  >
     <div v-if="game && game.players.length > 0">
       <v-subheader>PLAYERS</v-subheader>
       <player-list

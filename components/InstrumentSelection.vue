@@ -5,7 +5,7 @@
       outlined
       hide-details
       item-value="id"
-      item-text="name"
+      item-text="label"
       :items="instruments"
       :value="instrument"
       class="mr-3"

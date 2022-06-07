@@ -1,6 +1,6 @@
 <template>
   <div class="waiting-players-screen fill-height">
-    <v-card fill-height class="fill-height pa-10">
+    <v-card fill-height class="fill-height pa-10 transparent-background-1">
       <v-card-title>
         <h1>Waiting for players</h1>
         <v-spacer></v-spacer>

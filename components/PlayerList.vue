@@ -4,7 +4,7 @@
       :style="{ borderColor: player.color, opacity: player.online ? 1 : 0.3 }"
       v-for="player in players"
       :key="player.id"
-      class="mb-5 player-card"
+      class="mb-5 player-card transparent-background-3"
     >
       <div class="d-flex flex-no-wrap">
         <div class="d-flex flex-column justify-center px-3">
