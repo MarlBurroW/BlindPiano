@@ -37,12 +37,10 @@ export default {
     for (let i = 0; i < instrumentList.length; i++) {
       const InstrumentClass = instrumentList[i];
       const instrumentInstance = new InstrumentClass();
-
       instruments[InstrumentClass.id] = instrumentInstance;
     }
 
     this.instruments = instruments;
-
     this.eventBus.on("key-pressed", this.onKeyPressed);
     this.eventBus.on("key-released", this.onKeyReleased);
     this.eventBus.on("hold-pedal", this.onHoldPedal);
@@ -69,9 +67,17 @@ export default {
       immediate: true,
       handler(instrument) {
         if (instrument && !instrument.isLoaded()) {
-          instrument.load().then(() => {
-            instrument.connect(this.volumeNode);
-          });
+          this.$emit("update-loading-instrument", true);
+          console.log("loading");
+          instrument
+            .load()
+            .then(() => {
+              instrument.connect(this.volumeNode);
+            })
+            .finally(() => {
+              this.$emit("update-loading-instrument", false);
+              console.log("stop loading");
+            });
         }
       },
     },
@@ -139,7 +145,6 @@ export default {
       for (const instkey in this.instruments) {
         if (Object.hasOwnProperty.call(this.instruments, instkey)) {
           const instrument = this.instruments[instkey];
-
           instrument.reset();
         }
       }

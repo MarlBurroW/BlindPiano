@@ -1,6 +1,6 @@
 <template>
   <div class="fill-height">
-    <v-card fill-height class="fill-height pa-10">
+    <v-card fill-height class="fill-height pa-10 transparent-background-1">
       <v-card-title class="mb-5 justify-center">
         <h1>Current Score</h1>
       </v-card-title>

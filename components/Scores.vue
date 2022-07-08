@@ -1,5 +1,5 @@
 <template>
-  <v-simple-table>
+  <v-simple-table class="transparent-background-1">
     <template v-slot:default>
       <tbody>
         <tr v-for="(player, rank) in players" :key="player.id">

@@ -31,5 +31,9 @@ services:
     restart: always
     depends_on:
       - mysql
+  redis:
+    image: redis:latest
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
 volumes:
   mysql-volume:

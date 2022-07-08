@@ -56,6 +56,7 @@ export const mutations = {
             visibility: true,
             mute: false,
             volume: 0,
+            loadingInstrument: false,
           });
         }
       }

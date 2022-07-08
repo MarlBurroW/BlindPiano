@@ -4,6 +4,8 @@
       placeholder="Select your instrument"
       outlined
       hide-details
+      :loading="loading"
+      :disabled="loading"
       item-value="id"
       item-text="label"
       :items="instruments"
@@ -14,6 +16,8 @@
     </v-select>
 
     <v-select
+      :loading="loading"
+      :disabled="loading"
       v-if="currentInstrumentPresets.length > 0"
       placeholder="Select your preset"
       outlined
@@ -39,6 +43,9 @@ export default {
     },
     preset: {
       type: String,
+    },
+    loading: {
+      type: Boolean,
     },
   },
   mounted() {},

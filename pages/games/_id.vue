@@ -11,11 +11,13 @@
         :volume="getLocalPlayerSetting(player.id, 'volume')"
         :instrument="player.instrument"
         :preset="player.preset"
+        @update-loading-instrument="
+          setLocalPlayerSetting(player.id, 'loadingInstrument', $event)
+        "
         :player="player"
         :event-bus="keyboardEventBus"
         :master-volume="masterVolumeNode"
       ></Instrument>
-
       <GameProgress></GameProgress>
       <vue-scroll :ops="scrollOptions">
         <div class="d-flex flex-column fill-height">
@@ -24,29 +26,24 @@
               <WaitPlayers
                 v-if="game.hasState(gameStates.WAITING_PLAYERS_SCREEN)"
               ></WaitPlayers>
-
               <PreTurn
                 v-else-if="game.hasState(gameStates.PRE_TURN_SCREEN)"
               ></PreTurn>
-
               <ChooseSongScreen
                 v-else-if="game.hasState(gameStates.CHOOSE_SONG_SCREEN)"
               ></ChooseSongScreen>
               <LearnSong
                 v-else-if="game.hasState(gameStates.LEARNING_SONG_SCREEN)"
               ></LearnSong>
-
               <PlaySong
                 v-else-if="game.hasState(gameStates.PLAY_SONG_SCREEN)"
               ></PlaySong>
-
               <ScoresScreen
                 v-else-if="game.hasState(gameStates.SCORES_SCREEN)"
               ></ScoresScreen>
               <FinalScreen
                 v-else-if="game.hasState(gameStates.FINAL_SCREEN)"
               ></FinalScreen>
-
               <ResponseScreen
                 v-else-if="game.hasState(gameStates.RESPONSE_SCREEN)"
               ></ResponseScreen>
@@ -55,12 +52,10 @@
         </div>
       </vue-scroll>
     </v-main>
-
     <JoinGameDialog
       @user-created="joinGameSocket(gameId, $event)"
       :open="joinDialog"
     ></JoinGameDialog>
-
     <v-footer
       app
       padless

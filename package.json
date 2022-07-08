@@ -6,6 +6,7 @@
   "dependencies": {
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/i18n": "^7.2.2",
+    "@socket.io/redis-adapter": "^7.2.0",
     "@tonaljs/tonal": "^4.6.5",
     "@tonejs/piano": "^0.2.1",
     "body-parser": "^1.19.2",
@@ -24,6 +25,7 @@
     "notyf": "^3.10.0",
     "nuxt": "^2.15.8",
     "ordinal": "^1.0.3",
+    "redis": "^4.2.0",
     "sequelize": "^6.19.0",
     "serve-index": "^1.9.1",
     "socket.io": "^4.4.1",

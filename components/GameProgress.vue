@@ -1,6 +1,7 @@
 <template>
   <div>
     <v-toolbar
+      flat
       v-if="game && game.progress"
       class="d-flex justify-center transparent-background-3"
     >
@@ -22,9 +23,9 @@
     </v-toolbar>
     <v-toolbar
       dense
+      flat
       v-if="currentRoundTurns"
-      color="grey darken-4"
-      class="d-flex justify-center"
+      class="d-flex justify-center transparent-background-3 flat"
     >
       <div :key="turn.playerId" v-for="(turn, i) in currentRoundTurns">
         <v-chip

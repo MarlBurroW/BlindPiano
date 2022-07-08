@@ -8,22 +8,32 @@
 export default {};
 </script>
 
-<style>
+<style lang="scss">
 * {
   user-select: none;
 }
-.app {
-  background: #c94b4b !important; /* fallback for old browsers */
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Poppins:wght@400;700&display=swap");
+
+.v-application {
+  font-family: "Montserrat Alternates" !important;
+
   background: -webkit-linear-gradient(
-    to right,
-    #4b134f,
-    #c94b4b
+    to top right,
+    #8a2387,
+    #e94057,
+    #f27121
   ) !important; /* Chrome 10-25, Safari 5.1-6 */
   background: linear-gradient(
-    to right,
-    #4b134f,
-    #c94b4b
+    to top right,
+    #8a2387,
+    #e94057,
+    #f27121
   ) !important; /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+}
+
+.app {
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 .transparent-background-0 {

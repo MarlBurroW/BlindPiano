@@ -31,6 +31,7 @@
       </div>
       <div class="control">
         <InstrumentSelection
+          :loading="getLocalPlayerSetting(me.id, 'loadingInstrument')"
           :preset.sync="preset"
           :instrument.sync="instrument"
         ></InstrumentSelection>

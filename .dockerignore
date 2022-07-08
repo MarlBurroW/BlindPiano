@@ -1,0 +1,8 @@
+.env
+.env.example
+.gitignore
+.gitignore
+.editorconfig
+database.sqlite
+.nuxt
+node_modules
