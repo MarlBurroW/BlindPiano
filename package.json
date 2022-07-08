@@ -61,7 +61,8 @@
     "youtubei.js": "^1.4.1-dev.2"
   },
   "scripts": {
-    "start": "nodemon --watch nuxt.config.js --watch backend ./backend/server.js",
+    "start": "node ./backend/server.js",
+    "dev": "nodemon --watch nuxt.config.js --watch backend ./backend/server.js",
     "build": "nuxt generate"
   },
   "devDependencies": {
