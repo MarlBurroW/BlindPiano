@@ -1,7 +1,7 @@
 .env
 .env.example
 .gitignore
-.gitignore
+.git
 .editorconfig
 database.sqlite
 .nuxt
