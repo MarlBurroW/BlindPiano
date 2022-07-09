@@ -6,3 +6,6 @@
 database.sqlite
 .nuxt
 node_modules
+dist
+.github
+yarn-error.log

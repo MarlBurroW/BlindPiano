@@ -1,10 +1,10 @@
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
-
+  target: "static",
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: "frontend",
+    title: "Blind Piano",
     htmlAttrs: {
       lang: "en",
     },
@@ -13,6 +13,7 @@ export default {
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { hid: "description", name: "description", content: "" },
       { name: "format-detection", content: "telephone=no" },
+      { name: "author", content: "Malrburrow" },
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
   },
