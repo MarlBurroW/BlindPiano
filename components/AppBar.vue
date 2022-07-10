@@ -3,7 +3,9 @@
     <v-btn icon @click="leftDrawer = !leftDrawer"
       ><v-icon>mdi-dock-left</v-icon></v-btn
     >
-    <v-toolbar-title>Blind Piano by MarlburroW</v-toolbar-title>
+    <v-toolbar-title
+      >Blind Piano by MarlburroW - version {{ $version }}</v-toolbar-title
+    >
 
     <v-spacer></v-spacer>
 

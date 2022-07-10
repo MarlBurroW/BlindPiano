@@ -1,3 +1,15 @@
+let versionNumber = "dev";
+
+if (process.env.NODE_ENV === "production") {
+  const fs = require("fs");
+  versionNumber = fs.readFileSync("./version", {
+    encoding: "utf8",
+    flag: "r",
+  });
+}
+
+console.log("Current version: ", versionNumber);
+
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -14,6 +26,7 @@ export default {
       { hid: "description", name: "description", content: "" },
       { name: "format-detection", content: "telephone=no" },
       { name: "author", content: "Malrburrow" },
+      { name: "version", content: versionNumber },
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
   },

@@ -73,4 +73,8 @@ export default async (app, inject) => {
   inject("ordinal", ordinal);
 
   let game = null;
+
+  const version = document.querySelector('meta[name="version"]').content;
+
+  inject("version", version);
 };
