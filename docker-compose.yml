@@ -8,6 +8,7 @@ services:
       - .:/app
     ports:
       - "4000:4000"
+
   mysql:
     image: mariadb
     volumes:
@@ -31,9 +32,6 @@ services:
     restart: always
     depends_on:
       - mysql
-  redis:
-    image: redis:latest
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+
 volumes:
   mysql-volume:

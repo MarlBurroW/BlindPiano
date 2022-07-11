@@ -12,18 +12,9 @@ const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
-const { createAdapter } = require("@socket.io/redis-adapter");
-const { createClient } = require("redis");
-
-const pubClient = createClient({ url: "redis://redis:6379" });
-const subClient = pubClient.duplicate();
 
 const port = process.env.PORT;
 const isDev = process.env.NODE_ENV !== "production";
-
-Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
-  io.adapter(createAdapter(pubClient, subClient));
-});
 
 async function start() {
   const nuxt = await loadNuxt(isDev ? "dev" : "start");
