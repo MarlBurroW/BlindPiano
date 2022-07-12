@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blindpiano-app
+  namespace: default
+  labels:
+    app: blindpiano-app
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blindpiano-app
+  template:
+    metadata:
+      labels:
+        app: blindpiano-app
+    spec:
+      containers:
+        - name: blindpiano-app
+          image: marlburrow/blindpiano:0.0.1-25
+          ports:
+            - containerPort: 4000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: blindpiano-app-config
