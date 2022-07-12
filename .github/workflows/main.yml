@@ -47,6 +47,16 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/blindpiano:${{ steps.semver.outputs.version }}
+      - uses: rtCamp/action-slack-notify@v2
+        name: Send failure slack notification
+        if: ${{ failure() }}
+        env:
+          SLACK_CHANNEL: blindpiano
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_MESSAGE: ":warning: Le build de l'image de Blind piano version ${{ needs.build.outputs.version }} a échoué"
+          SLACK_TITLE: Déploiement échoué
+          SLACK_USERNAME: "Github Actions"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -69,3 +79,25 @@ jobs:
             kubernetes/service.yaml
           strategy: blue-green
           route-method: service
+
+      - uses: rtCamp/action-slack-notify@v2
+        name: Send failure slack notification
+        if: ${{ failure() }}
+        env:
+          SLACK_CHANNEL: blindpiano
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_MESSAGE: ":warning: Le déploiement de Blind piano version ${{ needs.build.outputs.version }} a échoué"
+          SLACK_TITLE: Déploiement échoué
+          SLACK_USERNAME: "Github Actions"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+      - uses: rtCamp/action-slack-notify@v2
+        name: Send success slack notification
+        if: ${{ success() }}
+        env:
+          SLACK_CHANNEL: blindpiano
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_MESSAGE: ":white_check_mark: Blind piano version ${{ needs.build.outputs.version }} déployée avec succès"
+          SLACK_TITLE: Déploiement réussi
+          SLACK_USERNAME: "Github Actions"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
