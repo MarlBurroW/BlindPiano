@@ -61,7 +61,7 @@ jobs:
         name: Deploy to kubernetes
         with:
           namespace: "default"
-          images: ${{ secrets.DOCKER_HUB_USERNAME }}/blindpiano:${{ jobs.build.version }}
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}/blindpiano:${{ needs.build.version }}
           manifests: |
             kubernetes/deployment.yaml
           strategy: blue-green
