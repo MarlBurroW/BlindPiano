@@ -63,7 +63,7 @@ jobs:
         name: Deploy to kubernetes
         with:
           namespace: "default"
-          images: ${{ secrets.DOCKER_HUB_USERNAME }}/blindpiano:${{ needs.build.version }}
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}/blindpiano:${{ needs.build.outputs.version }}
           manifests: |
             kubernetes/deployment.yaml
             kubernetes/service.yaml
